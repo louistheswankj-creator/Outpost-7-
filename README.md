@@ -1,10 +1,16 @@
-# 🌑 Outpost 7
+# 🚀 Mission Survive
 
-Open `index.html` in any browser (no install needed). Six lunar outposts were lost within their first week. You command the seventh: **survive 30 days (one full lunar cycle), stay under the radiation limit and bring home rock samples**. It is a choice-based survival game with no 2D or 3D world: every day you decide how to spend your hours, and every day brings problems.
+A browser-based astronaut survival game. Open `index.html` in any browser, no install needed.
+
+Pick a destination (Moon, Mars, or Europa), manage oxygen, water, food, power, health and morale over a multi-day mission, and handle random events. Each event and action teaches a real fact about survival in space (radiation, ISRU, dust, comms delay, bone loss). Science points unlock real-world spin-off technologies, showing why space exploration matters on Earth.
+
+## 🌑 Outpost 7
+
+Open `outpost-7.html` in any browser. Six lunar outposts were lost within their first week. You command the seventh: **survive 30 days (one full lunar cycle), stay under the radiation limit and bring home rock samples**. It is a choice-based survival game with no 2D or 3D world: every day you decide how to spend your hours, and every day brings problems.
 
 - **Astronaut training academy (real NASA training):** before the mission a 10-lesson course teaches how real astronauts train: selection and requirements, underwater spacewalk practice in the Neutral Buoyancy Laboratory, T-38 flying and survival training, reduced-gravity flights and g-forces, staying healthy in space (exercise, bone loss, the Twins Study), space radiation and dose limits, ISS life support systems, emergency simulations (Apollo 13, Apollo 11's 1202 alarm, the 2015 ammonia alarm, CAPCOM), teamwork, language and robotics, and Moon geology training. Each lesson first teaches, then quizzes. Graduating earns bonus Science Points.
 - **How to play (separate):** a short 'How to play Outpost 7' page follows training, and the 📖 How to play button (always at the top) opens the full 12-section game manual. There is no landing: you start straight on Day 1.
-- **Live telemetry and live space weather:** the top of the 📈 Data tab has real-time squiggly sensor traces (radiation dose rate, power bus, cabin oxygen pressure, habitat and outside temperature, crew heart rate) that update four times a second and react to your base (the dose rate spikes in a radiation storm). Below it is a live NOAA Space Weather Prediction Center feed: the real solar X-ray flux from the GOES satellite for the last 6 hours (A, B, C, M and X flare classes) and the planetary Kp index, refreshed every minute. If the real Sun has had a medium or large flare, radiation events become more likely in your game. The NOAA feed needs network access, so it works when you open `index.html` directly in a browser; some hosted previews block it and show a note instead.
+- **Live telemetry and live space weather:** the top of the 📈 Data tab has real-time squiggly sensor traces (radiation dose rate, power bus, cabin oxygen pressure, habitat and outside temperature, crew heart rate) that update four times a second and react to your base (the dose rate spikes in a radiation storm). Below it is a live NOAA Space Weather Prediction Center feed: the real solar X-ray flux from the GOES satellite for the last 6 hours (A, B, C, M and X flare classes) and the planetary Kp index, refreshed every minute. If the real Sun has had a medium or large flare, radiation events become more likely in your game. The NOAA feed needs network access, so it works when you open `outpost-7.html` directly in a browser; some hosted previews block it and show a note instead.
 - **Data charts:** the 📈 Data tab shows how much of everything you have: bars for the seven meters, materials in stock, the day's power budget, modules by type and shielding, plus line charts of oxygen/water/food, power/health/morale, radiation against the sickness and limit lines, and Science Points. Hover or tap for exact values, and every chart has a table view. Chart colors use a validated colorblind-safe palette.
 - **Choose your world: Moon or Mars.** After the dramatic opening you pick a world, and they play differently, using real NASA data:
   - **Moon:** full sunlight but 15 dark days with no solar power, about 1.4 mSv/day of radiation, a 1.3 second radio delay (calls home lift morale), cargo every day, and oxygen from moon rock. Rock samples include anorthosite (Genesis Rock), mare basalt, titanium basalt, breccia, orange volcanic glass, KREEP rock, regolith and polar ice.
@@ -23,6 +29,9 @@ Open `index.html` in any browser (no install needed). Six lunar outposts were lo
 - **Win:** survive all 30 days, collect the required rock samples (4 to 6 by mode) and load them into the return capsule. A finish-mission sequence plays.
 - Modes: Cadet, Junior, Commander, Veteran and Free Play (no failure).
 
-## Play online
-
-Turn on GitHub Pages (Settings > Pages > Deploy from a branch > `main` / root) to get a public link.
+## Visuals
+- Animated event banners by type (radiation, equipment, medical, environment, supply, psychological).
+- Base scene with a sun that crosses the sky through the day and an astronaut beside the habitat.
+- Clickable scaled map in the Explore tab, with 1, 2 and 3 km rings.
+- Live habitat systems schematic in the Base tab (tanks, battery, heart monitor, morale, radiation dial).
+- Rock sample illustrations, module previews in the build planner, Moon and Mars discs, and a diagram for each training lesson.
