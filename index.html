@@ -1,0 +1,1217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outpost 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b1f;--panel:#111a3d;--panel2:#1a2656;--text:#eaf0ff;--muted:#9aa8d8;--accent:#ffb347;--good:#4ade80;--bad:#f87171;--blue:#60a5fa;--line:#2b3a78}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#16215a 0,#070b1f 60%) fixed;color:var(--text);font:15px/1.6 Audiowide,"Times New Roman",serif;min-height:100vh}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(7,11,31,.85);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:1.15rem;letter-spacing:.5px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:.85rem}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1,h2,h3{font-family:Audiowide,"Times New Roman",serif;font-weight:400;letter-spacing:.03em}b,strong{font-weight:400;color:#fff}h2{margin:.2em 0 .4em}h3{margin:.2em 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+button{font:inherit;font-weight:400;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--accent);color:#1b1200;border-color:var(--accent);font-weight:700}
+button.sm{padding:4px 10px;font-size:.85rem}
+.muted{color:var(--muted)}.small{font-size:.85rem}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.opt{display:block;text-align:left;width:100%;margin:6px 0}
+.opt.sel{border-color:var(--accent);background:#2a2f63}
+.opt .ctx{display:block;color:var(--muted);font-size:.85rem}
+.bar{height:12px;background:#0a1030;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:var(--good);transition:width .3s}
+.bar.warn>i{background:var(--accent)}.bar.danger>i{background:var(--bad)}.bar.blue>i{background:var(--blue)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.stages{display:flex;gap:8px;margin:6px 0}
+.stages div{flex:1;text-align:center;padding:6px;border-radius:8px;border:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.stages .on{border-color:var(--accent);color:var(--text);background:#2a2f63}.stages .done{color:var(--good);border-color:var(--good)}
+.map{position:relative;height:90px;margin:14px 6px 24px;border-bottom:3px dashed var(--line)}
+.map .pt{position:absolute;bottom:-4px;transform:translateX(-50%);text-align:center;font-size:.75rem}
+.map .pt span{display:block;font-size:1.4rem}
+.map .rv{position:absolute;bottom:22px;transform:translateX(-50%);font-size:1.8rem;transition:left .5s}
+.log{max-height:170px;overflow:auto;background:#0a1030;border-radius:10px;padding:8px 12px;font-size:.9rem}
+.log p{margin:2px 0}.log .ev{color:var(--accent)}.log .er{color:var(--bad)}.log .ok{color:var(--good)}
+.debrief{border-left:4px solid var(--accent);background:#0f1740;padding:10px 14px;border-radius:0 10px 10px 0;margin:8px 0}
+canvas{width:100%;max-width:700px;background:#02040f;border:1px solid var(--line);border-radius:10px;display:block;touch-action:none}
+select{font:inherit;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--accent);color:#1b1200;font-weight:700;padding:8px 18px;border-radius:999px;z-index:9;box-shadow:0 4px 20px #0008}
+.tag{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:4px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}td,th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:.9rem}
+.home-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;font-family:Audiowide,"Times New Roman",serif;padding-block:8px}
+.home-stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
+.home-stars circle{animation:tw 4s ease-in-out infinite}.home-stars circle:nth-child(3n){animation-delay:-1.3s}.home-stars circle:nth-child(5n){animation-delay:-2.6s}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.home-title{margin:0;font-size:clamp(1.8rem,6vw,3.2rem);letter-spacing:.12em;font-family:inherit;color:#fff}
+.home-sub{margin:0;color:#9aa8d8;letter-spacing:.2em;font-size:.85rem;text-transform:uppercase}
+.solar{width:min(100%,62vh,640px);height:auto;display:block}
+.home-order{margin:0;color:#7e8ab8;font-size:.72rem;letter-spacing:.08em}
+.home-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.hbtn{font-family:Audiowide,"Times New Roman",serif;font-weight:400;font-size:1.05rem;letter-spacing:.08em;padding:12px 26px;border-radius:999px;background:#000;border:2px solid #60a5fa;color:#eaf0ff;box-shadow:0 0 18px #60a5fa55}
+.hbtn.primary{background:var(--accent);border-color:var(--accent);color:#1b1200;box-shadow:0 0 22px #ffb34777}
+.hbtn:hover:not(:disabled){transform:translateY(-2px)}
+.home-info{margin:0;color:#9aa8d8;font-size:.85rem}
+body.home{background:#000}body.home header{display:none}
+@media(prefers-reduced-motion:reduce){.home-stars circle{animation:none}}
+.scene{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;margin:8px 0}
+.streak{animation:drift 1.3s linear infinite}
+@keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(880px)}}
+@media(prefers-reduced-motion:reduce){.streak{animation:none}}
+@media(max-width:600px){main{padding:10px}.stages div{font-size:.7rem}}
+body.wide main{max-width:none;padding:6px 8px}body.nosb .side{display:none}body.nosb .play{grid-template-columns:1fr}
+.play{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;align-items:start}
+.stage{position:relative}
+#wc{width:100%;max-width:none;height:auto;aspect-ratio:900/540;border:1px solid var(--line);border-radius:12px;background:#0a0d1c;display:block;touch-action:none;cursor:pointer}
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.dpad{display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,36px);gap:4px}
+.dpad button{padding:0;touch-action:none}#dU{grid-column:2}#dL{grid-column:1;grid-row:2}#dD{grid-column:2;grid-row:2}#dR{grid-column:3;grid-row:2}
+.pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(88%,380px);max-height:80%;overflow:auto;background:var(--panel);border:2px solid var(--accent);border-radius:14px;padding:12px;z-index:3;box-shadow:0 10px 40px #000a}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;position:sticky;top:64px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin:8px 0}
+.tabsrow{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.sidelist{max-height:340px;overflow:auto;padding-right:2px}
+.sidelist .opt{margin:4px 0;padding:6px 10px}
+@media(max-width:900px){.play{grid-template-columns:1fr}.side{position:static}}
+.rise{animation:rise 6s ease-in forwards}.fall{animation:fall 6s ease-out forwards}
+@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-420px)}}
+@keyframes fall{from{transform:translateY(-200px)}to{transform:translateY(60px)}}
+.flame{transform-origin:50% 0;animation:fl .15s ease-in-out infinite alternate}@keyframes fl{from{transform:scaleY(.8)}to{transform:scaleY(1.2)}}
+.puff{animation:pf 3s ease-out forwards}@keyframes pf{from{transform:scale(.6);opacity:.6}to{transform:scale(2.6);opacity:0}}
+@media(prefers-reduced-motion:reduce){.rise,.fall,.flame,.puff{animation:none}}
+.stage{position:relative;height:calc(100vh - 74px);min-height:440px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#02040f}
+#wc{position:absolute;inset:0;width:100%;height:100%;max-width:none;border:0;border-radius:0;aspect-ratio:auto;touch-action:none;cursor:pointer}
+.hud{position:absolute;top:6px;left:6px;right:6px;pointer-events:none;display:flex;flex-direction:column;gap:5px}
+.hrow{display:flex;gap:5px;flex-wrap:wrap}
+.hchip{background:rgba(6,10,30,.82);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.78rem;white-space:nowrap}
+.hchip.strong{border-color:var(--accent);color:#fff}
+.hbars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;max-width:760px}
+.hb{background:rgba(6,10,30,.82);border:1px solid var(--line);border-radius:8px;padding:2px 7px;font-size:.72rem}
+.hb .bar{height:7px;margin-top:2px}
+.hud .small.good{background:rgba(6,10,30,.82);border-radius:8px;padding:3px 9px;margin:0;align-self:flex-start;max-width:520px}
+.panel{position:absolute;left:8px;top:104px;width:min(400px,94%);max-height:calc(100% - 210px);background:rgba(10,16,44,.96);border:2px solid var(--accent);border-radius:14px;z-index:4;display:flex;flex-direction:column;box-shadow:0 10px 40px #000a}
+.panel[hidden]{display:none}
+.phead{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.pbody{overflow:auto;padding:8px 10px}
+.pbody .opt{margin:4px 0;padding:6px 10px}
+.hotbar{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:max-content;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:96%;z-index:3}
+.hotbar button{background:rgba(6,10,30,.9);padding:6px 11px;font-size:.85rem}
+.hotbar button.primary{background:var(--accent)}
+.dpad{position:absolute;left:10px;bottom:54px;display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,40px);gap:4px;z-index:3}
+.dpad button{padding:0;touch-action:none;background:rgba(6,10,30,.85)}#dU{grid-column:2}#dL{grid-column:1;grid-row:2}#dD{grid-column:2;grid-row:2}#dR{grid-column:3;grid-row:2}
+.actbtns{position:absolute;right:10px;bottom:54px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;z-index:3}
+@media(max-width:700px){.hbars{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{top:112px;max-height:calc(100% - 240px)}.hotbar button{padding:5px 8px;font-size:.75rem}}
+
+html{background:#070b1f}
+:root{--surf:#111a3d;--grid:#2b3a78;--muted2:#9aa8d8;--ref:#c3c2b7;--ink:#eaf0ff;--ink2:#c3c2b7}
+header{position:relative}
+.hudcard{position:static;z-index:6;background:rgba(7,11,31,.97);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0}
+.hudcard .hbars{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}
+.hudcard .hb{background:rgba(26,38,86,.6)}
+@media(min-width:900px){.hudcard{position:sticky;top:0}}
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;z-index:50;padding:12px}
+.modalbg[hidden]{display:none}
+.modalbox{background:var(--panel);border:2px solid var(--accent);border-radius:14px;padding:16px;max-width:580px;max-height:88vh;overflow:auto}
+.bq{width:100%;font:inherit;background:#0a1030;color:var(--text);border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0}
+.bq:focus{outline:none;border-color:var(--accent)}
+.matrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chartbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;position:relative}
+.chartbox h4{margin:0 0 6px;font-weight:400;font-size:.95rem}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;margin:6px 0;color:var(--ink2)}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.tipbox{position:absolute;z-index:3;background:#0a1030;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.8rem;pointer-events:none;min-width:130px}
+.tipbox i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.hbar{display:grid;grid-template-columns:minmax(120px,170px) 1fr minmax(70px,auto);gap:8px;align-items:center;margin:5px 0;font-size:.82rem}
+.hbar .ht{height:10px;background:#0a1030;border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+.hbar .ht i{display:block;height:100%;background:#3987e5;border-radius:0 4px 4px 0}
+.hbar .hv{text-align:right;color:var(--ink2)}
+details summary{cursor:pointer;margin:6px 0;color:var(--muted)}
+.msec{border-bottom:1px solid var(--line);padding:4px 0}
+.msec summary{font-size:1rem;color:var(--text)}
+.msec table{margin:8px 0}
+.counters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0}
+.cnt{background:rgba(26,38,86,.7);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center}
+.cnt .cn{font-size:.75rem;color:var(--muted)}
+.cnt .cv{font-size:1.9rem;line-height:1.15;color:#fff}
+.cnt .cv span{font-size:.75rem;color:var(--muted);margin-left:4px}
+.cnt .cd{font-size:.7rem;color:var(--muted)}
+.cnt.warn{border-color:#fbbf24}.cnt.danger{border-color:#f87171}.cnt.danger .cv{color:#fecaca}
+.cnt.sp{border-color:var(--accent)}.cnt.sp .cv{color:var(--accent)}
+.drama-wrap{min-height:calc(100vh - 80px);justify-content:center;position:relative}
+.dramatext{max-width:760px;margin:0 auto;padding:10px;text-align:center;font-family:Audiowide,"Times New Roman",serif}
+.dline{font-size:clamp(1.15rem,3.2vw,1.9rem);line-height:1.6;margin:0 0 22px;color:#fff;text-shadow:0 0 18px rgba(96,165,250,.55);min-height:1.6em}
+.dline:first-child{font-size:clamp(1.5rem,4.4vw,2.6rem);color:#ffb347;text-shadow:0 0 22px rgba(255,179,71,.6)}
+.caret{display:inline-block;width:.55em;height:1em;background:#fff;margin-left:3px;vertical-align:-.12em;animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.dramabtn{margin-top:10px;text-align:center}
+.dskip{position:absolute;top:8px;right:8px}
+@media(prefers-reduced-motion:reduce){.caret{animation:none}}
+@media(max-width:700px){.counters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.livecv{width:100%;max-width:none;display:block;border-radius:8px;margin:6px 0;border:0}
+.livedot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:6px;animation:lp 1.2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:.35}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.livedot{animation:none}}
+.msec ul,.msec ol{padding-left:20px;margin:6px 0}
+@media(max-width:700px){.hudcard .hbars{grid-template-columns:repeat(2,minmax(0,1fr))}.hbar{grid-template-columns:100px 1fr 60px}}
+</style>
+</head>
+<body>
+<header>
+  <h1 style="cursor:pointer" onclick="go('home')" title="Home">🌑 Outpost 7 <span class="muted small">Survive 30 days</span></h1>
+  <div class="row"><button class="sm" onclick="openManual()">📖 How to play</button><div class="chips" id="chips"></div></div>
+</header>
+<main id="app"></main>
+<div id="modal" class="modalbg" hidden></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+const SAVE_KEY="outpost7V3";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const rnd=()=>Math.random();
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const RES=[["o2","🫧","Oxygen"],["water","💧","Water"],["food","🍲","Food"],["power","⚡","Power"],["health","❤️","Health"],["morale","🙂","Morale"]];
+const RIC=Object.fromEntries(RES.map(r=>[r[0],r[1]]));
+const NIGHTS=30,RADMAX=250,RADBASE=1.4;
+const MODES={
+ cadet:{n:"Cadet",icon:"🌱",tag:"Ages 6–9 · gentle",desc:"Slower drain, fewer problems, lower radiation, 16 hours a day and tips.",dr:.6,sev:.6,en:16,samp:4,prob:.45,radm:.6,hints:true},
+ junior:{n:"Junior",icon:"🧑‍🚀",tag:"Ages 9–12 · standard",desc:"The standard challenge: about one major problem a day, 14 hours a day, with tips.",dr:1,sev:1,en:14,samp:5,prob:.7,radm:1,hints:true},
+ commander:{n:"Commander",icon:"🎖️",tag:"Challenge",desc:"Faster drain, a major problem most mornings, stronger radiation, 13 hours a day. No tips.",dr:1.2,sev:1.3,en:13,samp:6,prob:.8,radm:1.3,hints:false},
+ veteran:{n:"Veteran",icon:"🛰️",tag:"Hard",desc:"A major problem most mornings, harsh radiation, 12 hours a day. No tips.",dr:1.4,sev:1.5,en:12,samp:6,prob:.85,radm:1.6,hints:false},
+ free:{n:"Free Play",icon:"🧪",tag:"Sandbox",desc:"You cannot lose. Try every choice, refill supplies any time and read all the stories.",dr:1,sev:1,en:18,samp:1,prob:.6,radm:1,hints:true,free:true}
+};
+const SITE={id:"pole",n:"Lunar south pole region",icon:"🌑",dark:[16,30],morale:0,radf:1,ice:1};
+const DAY={o2:12,water:11,food:9,gen:60,use:14,health:3,morale:3,dust:18},NIGHT={o2:12,water:11,food:9,power:44,morale:5};
+const FACTS=[
+ "The Moon's gravity is about 1.62 m/s², roughly one sixth of Earth's.","A full lunar day lasts about 29.5 Earth days: about two weeks of sunlight, then two weeks of night.",
+ "Daytime on the Moon reaches about 127 °C. Night drops to about -173 °C.","Permanently shadowed craters near the poles drop below -246 °C, among the coldest places NASA has measured.",
+ "Radio signals take about 1.3 seconds to travel between the Moon and Earth.","Twelve astronauts have walked on the Moon, all during the six Apollo landings between 1969 and 1972.",
+ "Apollo astronauts brought back about 382 kg of Moon rock and soil.","Apollo 17 astronauts spent about three days on the surface, the longest Apollo stay.",
+ "The Apollo Lunar Roving Vehicle could reach about 13 km/h. Apollo 17's rover drove about 36 km in total.","NASA's Artemis program plans to return people to the Moon, with landing regions near the south pole.",
+ "The ISS now recycles about 98% of its water, including sweat and breath moisture.","ISS astronauts exercise about two hours every day to protect their bones and muscles.",
+ "Apollo seismometers recorded moonquakes. In 1969 the Moon 'rang like a bell' for over an hour after an impact.","In 2009 NASA's LCROSS mission found water in the debris plume from Cabeus crater.",
+ "NASA's Lunar Reconnaissance Orbiter has mapped the Moon since 2009, including its polar ice craters.","Shackleton crater is about 21 km wide and about 4 km deep. Parts of its floor have not seen sunlight for billions of years.",
+ "Moon rock is about 40% oxygen by mass, locked in minerals. Heating it can free oxygen.","Perseverance's MOXIE made about 122 grams of oxygen from Mars air in total.",
+ "NASA's Kilopower test (KRUSTY, 2018) showed a small nuclear reactor can run steadily, in tests up to about 1 kilowatt.","NASA's career radiation limit for astronauts is 600 mSv, adopted in 2022.",
+ "People on Earth receive about 3 mSv a year from natural background radiation.","The Moon has no global magnetic field and no thick atmosphere, so radiation reaches the surface.",
+ "The same side of the Moon always faces Earth, because it is tidally locked.","In 1968 Apollo 8 astronauts took the famous Earthrise photograph from lunar orbit.",
+ "Apollo samples are stored and studied at NASA's Johnson Space Center in Houston.","The Moon is about 3,474 km across, a little over a quarter of Earth's diameter.",
+ "Apollo 15's 'Genesis Rock' is anorthosite about 4.1 billion years old.","Lunar dust is sharp and sticky. Apollo 17's Harrison Schmitt reported hay-fever-like symptoms from it.",
+ "Astronauts in orbit can lose about 1% of their bone density per month without exercise.","Mission Control flight surgeons monitor astronaut health from the ground, even for the Artemis missions."
+];
+const NASA=[
+ ["Gravity","1.62 m/s², about one sixth of Earth's."],
+ ["Lunar day","About 29.5 Earth days per cycle: roughly 15 days of sunlight and 15 of night (the exact split depends on where you are)."],
+ ["Temperature","Up to about 127 °C (260 °F) in sunlight, about -173 °C (-280 °F) at night, and below -246 °C (-410 °F) in permanently shadowed polar craters."],
+ ["Radio delay","About 1.3 seconds each way between the Moon and Earth."],
+ ["Radiation","Measurements on the Moon's surface show roughly 1.4 mSv per day, two to three times the ISS dose, because there is no atmosphere or magnetic field. NASA's career limit is 600 mSv. This game uses a 250 mSv limit for one month."],
+ ["Air","An astronaut needs about 0.84 kg of oxygen every day."],
+ ["Water","The ISS recycles about 98% of its water."],
+ ["Samples","Apollo astronauts brought home about 382 kg of Moon rock and soil."]
+];
+const surfaceTemp=()=>isDark(S.day)?-173:Math.round(-40+167*Math.sin(Math.PI*clamp(dayProg(),0,1)));
+const dayProg=()=>clamp(1-S.energy/MD().en,0,1);
+function clock(){const h=7+dayProg()*12;return String(Math.floor(h)).padStart(2,"0")+":"+String(Math.floor((h%1)*60)).padStart(2,"0")}
+
+/* name, hours, power price, (unused), unlock stage, fact, points, level, outside */
+const ACT=[
+ ["Take a picture of the landscape",1,0,0,1,"Photographs let scientists measure rocks, slopes and shadows long after you leave.",5,"Very easy",0],
+ ["Watch the sky (sunset or Earth)",1,0,0,1,"From the Moon's near side Earth hangs in nearly the same spot forever because the Moon is tidally locked.",5,"Very easy",0],
+ ["Brush dust off solar panels",1,0,0,1,"Dust on Opportunity's panels cut its power until a storm ended the mission. Brushing keeps energy flowing.",5,"Very easy",1],
+ ["Picture studied in rocket",2,4,0,1,"Orbiter photos show craters; shadows are used to work out how deep they are.",10,"Easy",0],
+ ["Stargaze through the rocket telescope",2,4,0,1,"With no air, stars do not twinkle on the Moon. They look steady and sharp.",10,"Easy",0],
+ ["Exercise to protect bones and muscles",2,4,0,1,"Astronauts exercise about 2 hours a day. Low gravity makes bones lose density.",10,"Easy",0],
+ ["Read your radiation badge",2,4,0,1,"There is no thick air or magnetic field on the Moon, so radiation is higher than on Earth.",10,"Easy",0],
+ ["Measure plant growth",2,4,0,1,"Plants help recycle air and could become fresh food on long missions.",10,"Easy",0],
+ ["Check the reactor heat output",2,4,0,1,"Nuclear batteries turn heat into electricity. Curiosity's makes about 110 W, like a light bulb.",10,"Easy",0],
+ ["Measure the ground temperature",2,4,0,1,"The lunar surface swings from about 120 °C in daylight to about -170 °C at night.",10,"Easy",1],
+ ["Analyze meteorite",2,4,0,1,"Meteorites are pieces of asteroids and planets. They show what the early solar system was made of.",15,"Easy",0],
+ ["Photograph moons or Earth in the sky",2,4,0,1,"Mars has two tiny moons, Phobos and Deimos. Earth's phases look like the Moon's phases.",15,"Easy",0],
+ ["Radio a school on Earth",2,4,0,1,"Radio takes about 1.3 seconds to reach the Moon, but 3 to 22 minutes to reach Mars.",15,"Easy",0],
+ ["Scan rocks with a spectrometer",2,4,0,1,"Spectrometers read the light 'fingerprint' of minerals. ChemCam even zaps rocks with a laser.",15,"Easy",0],
+ ["Measure an impact crater",2,4,0,1,"Crater size and shape tell scientists how big the impact was and how old the surface is.",15,"Easy",1],
+ ["Sample basalt lava rock",2,4,0,1,"Basalt is cooled lava. The dark lunar maria are mostly basalt, roughly 3 to 3.5 billion years old.",15,"Easy",1],
+ ["Survey a crater rim",2,4,0,1,"Crater rims expose deep rock layers that were thrown out by the impact.",15,"Easy",1],
+ ["Measure carbon dioxide frost",2,4,0,1,"On Mars, carbon dioxide freezes into frost at the poles in winter, because Mars's thin air is mostly CO2.",15,"Easy",1],
+ ["Measure moving sand dunes",2,4,0,1,"Mars has wind-blown dunes that move by metres every year.",15,"Easy",1],
+ ["Dirt sample",5,8,0,2,"Lunar regolith is sharp, glassy dust because there is no wind or water to smooth it.",20,"Medium",1],
+ ["Work on dirt sample in rocket",5,8,0,2,"Heating regolith can release oxygen, which could one day make air and fuel.",20,"Medium",0],
+ ["Grow food and vegetation on the rocket",5,8,0,2,"Salad grown on the ISS has been eaten by astronauts. Fresh food helps morale and nutrition.",20,"Medium",0],
+ ["Find meteorite",5,8,0,2,"Dark meteorites stand out on pale lunar soil and on Mars's plains.",20,"Medium",1],
+ ["Map buried ice with ground radar",5,8,0,2,"Ground radar sends waves underground. Ice buried at the poles could become water and rocket fuel.",20,"Medium",1],
+ ["Sieve sand from the riverbed",5,8,0,2,"Grain shapes show whether water ever moved the sand. Round grains mean flowing water.",20,"Medium",1],
+ ["Measure how much your shield blocks",5,8,0,2,"Thick regolith or water walls block radiation and tiny meteoroids.",20,"Medium",0],
+ ["Set up a science instrument",5,8,0,2,"Instruments left behind keep sending data after the crew goes home.",20,"Medium",1],
+ ["Study gullies on a slope",5,8,0,2,"Gullies on Mars slopes may have been carved by flowing material. Scientists still debate whether it was liquid water or dry ice frost.",20,"Medium",1],
+ ["Collect hematite \"blueberries\"",5,8,0,2,"Opportunity found small round hematite spherules nicknamed blueberries on Mars. They formed in water.",20,"Medium",1],
+ ["Collect a bright highland rock",5,8,0,2,"The Moon's bright highlands are mostly anorthosite, rock from its original crust.",20,"Medium",1],
+ ["Study a rolling-boulder track",5,8,0,2,"Boulder tracks on slopes show that moonquakes and impacts shake the ground.",20,"Medium",1],
+ ["Weather and radiation log",7,12,0,3,"Logging data every day shows patterns, such as solar storms, that warn crews.",25,"Hard",0],
+ ["Health check: compare astronaut body vs Earth standard",7,12,0,3,"Medics compare heart rate, bone density and weight with Earth baselines.",25,"Hard",0],
+ ["Map the rock layers",7,12,0,3,"Layers are like pages of a history book. The deeper the layer, the older the story.",25,"Hard",1],
+ ["Set up a seismometer",7,12,0,3,"Apollo seismometers heard moonquakes. The Moon 'rang like a bell' for over an hour.",25,"Hard",1],
+ ["Explore a lava rille",7,12,0,3,"Apollo 15 explored Hadley Rille, a winding channel carved by flowing lava.",25,"Hard",1],
+ ["Map a lunar swirl",7,12,0,3,"Lunar swirls such as Reiner Gamma are bright patterns linked to local magnetic fields.",25,"Hard",1],
+ ["Test clay minerals",7,12,0,3,"Clay minerals form when rock and water meet, so they are clues to wet pasts.",25,"Hard",0],
+ ["Collect volcanic glass beads",7,12,0,3,"Apollo 17 found orange glass beads from lava fountains about 3.6 billion years ago.",25,"Hard",1],
+ ["Drill a deep rock core",7,12,0,3,"Drill cores keep rock layers in order, so scientists can read their history.",25,"Hard",1],
+ ["Climb down a crater cliff",7,12,0,3,"Rope and tether teams are trained for steep slopes. Safety comes first.",25,"Hard",1],
+ ["Pack a sample tube for return to Earth",7,12,0,3,"Perseverance seals rock cores in tubes to be returned to Earth labs.",25,"Hard",0],
+ ["Relay data through an orbiter",7,12,0,3,"Orbiters act as radio relays so the surface can talk to Earth more often.",25,"Hard",0],
+ ["Launch a weather balloon",7,12,0,3,"Balloons measure temperature and pressure at different heights.",25,"Hard",1],
+ ["Run a heart and sleep study",7,12,0,3,"Sleep and heart rhythms change in space, which helps doctors plan long trips.",25,"Hard",0],
+ ["Track the Sun with a solar telescope",7,12,0,3,"Solar flares can be dangerous. Telescopes help give warnings.",25,"Hard",0],
+ ["Send data back to Earth",7,12,0,3,"Data is sent in packets; a good link may take minutes to send a picture from Mars.",25,"Hard",0],
+ ["Try activities on the Moon or Mars",7,12,0,3,"On the Moon gravity is one sixth of Earth's, so a jump looks like slow motion.",25,"Hard",1],
+ ["Make oxygen from local resources",10,16,0,4,"Perseverance's MOXIE made oxygen from Mars air. Moon rocks are about 40% oxygen by mass.",40,"Very hard",0],
+ ["Space walk discoveries",10,16,0,4,"Apollo crews found new rock types on EVAs that robots had missed.",40,"Very hard",1],
+ ["Grow vegetation in Martian or lunar soil",10,16,0,4,"Scientists have grown plants in soil made like lunar and Martian regolith, with nutrients added.",40,"Very hard",0],
+ ["Find water",10,16,0,4,"Ice in permanently shadowed craters could supply drinking water, air and fuel.",40,"Very hard",1],
+ ["Discover evidence of past life",10,16,0,4,"No life has been found yet, but Perseverance is collecting rock cores that might hold signs.",40,"Very hard",1],
+ ["Explore a lava tube cave",10,16,0,4,"Lava tubes could shelter bases from radiation and temperature swings.",40,"Very hard",1],
+ ["Probe a permanently shadowed crater",10,16,0,4,"Some craters have not seen sunlight for billions of years, at about -240 °C.",40,"Very hard",1]
+];
+const actPts=a=>a[6];
+const actEnergy=a=>a[1];
+
+const QUIZ = [
+ {q:"Why did NASA's Opportunity rover stop working in 2018?",a:["A giant dust storm blocked sunlight to its solar panels","Its wheels fell off","It ran out of fuel","It fell into a crater"],c:0,e:"Dust storm. Solar rovers lose power when dust blocks sunlight.",g:1,v:5},
+ {q:"What kind of power does Curiosity use?",a:["Solar panels","A nuclear battery","Gasoline","Wind"],c:1,e:"A nuclear battery (about 110 W) gives steady power day and night.",g:1,v:5},
+ {q:"Why must Mars rovers drive themselves between commands?",a:["They are lazy","Radio signals take minutes to travel, so orders arrive late","The Sun blocks signals","Rovers cannot be controlled"],c:1,e:"Distance creates delay. Rovers follow queued commands and use autonomous driving.",g:2,v:5},
+ {q:"Which rock is made of fragments fused together by meteorite impacts?",a:["Basalt","Anorthosite","Breccia","Ice"],c:2,e:"Breccia is made of broken pieces welded together by impacts.",g:3,v:5},
+ {q:"Which rock formed from cooled lava on the Moon's dark plains?",a:["Basalt","Anorthosite","Granite","Sandstone"],c:0,e:"Basalt is volcanic rock. The dark plains (maria) are old lava flows.",g:3,v:5},
+ {q:"Why are spacecraft built from light and strong materials?",a:["It looks cool","Every extra kilogram costs lots of money to launch","Heavy things float","Light materials are always cheaper"],c:1,e:"Launch cost depends heavily on weight, so engineers want strength without weight.",g:4,v:5},
+ {q:"What do Kapton and Mylar blankets do on spacecraft?",a:["Make oxygen","Reflect sunlight and trap heat","Store water","Block radio"],c:1,e:"They are thin layers that reflect sunlight and hold heat in, helping with temperature swings.",g:4,v:5},
+ {q:"Why could building with local regolith cut launch weight?",a:["Regolith is lighter than air","Bricks and shields can be made on the Moon instead of shipped from Earth","It needs no machines","It is magnetic"],c:1,e:"Using local material means less mass launched from Earth. You still need a printer and time.",g:5,v:8},
+ {q:"Which Apollo vehicle carried astronauts at about 13 km/h on the Moon?",a:["Lunar Roving Vehicle","Space shuttle","Hubble","Sojourner"],c:0,e:"The LRV was an electric car used on Apollo 15, 16 and 17.",g:1,v:5},
+ {q:"Why does a rover with aluminum wheels worry about sharp rocks?",a:["Rocks are magnetic","Sharp rocks can punch holes in thin wheels, as seen on Curiosity","Rocks are hot","Wheels melt"],c:1,e:"Curiosity's wheels got dents and holes, so later rovers use tougher designs.",g:1,v:5},
+ {q:"How fast is a typical Mars rover?",a:["About 100 km/h","About 13 km/h","About 0.1 km/h","Speed of light"],c:2,e:"Mars rovers are very slow, around 0.1 km/h, so planning routes matters.",g:2,v:5},
+ {q:"Why is the Moon a good tutorial world before Mars?",a:["Same systems but shorter delay","It has air","It has no gravity","It has no rocks"],c:0,e:"The Moon has almost no delay, so the same lessons come with less difficulty.",g:2,v:5},
+ {q:"Which hazard is the main landing problem for a crewed Moon lander?",a:["Fish","Dust kicked up by engines and rough terrain","Rain","Wind"],c:1,e:"Landing engines throw dust, and rocks or slopes can tip a lander.",g:1,v:8},
+ {q:"What might be found in permanently shadowed craters near the Moon's poles?",a:["Water ice","Rainforests","Gold bricks","Oceans"],c:0,e:"Cold traps can preserve water ice, useful for drinking and rocket fuel.",g:5,v:8},
+ {q:"Why do astronauts exercise about 2 hours a day in space?",a:["For fun only","To protect bones and muscles in low gravity","To warm up","To make power"],c:1,e:"Low gravity makes bones and muscles weaker unless they are used.",g:1,v:5},
+ {q:"Why is a reliability meter used before sending a crew?",a:["To count money","Because a system must be proven by repeated safe landings first","To pick astronauts","To track fuel"],c:1,e:"Real missions test landers many times uncrewed before risking people.",g:2,v:5}
+];
+
+
+
+function starsSVG(n,w,h,seed){let x=seed,o="";for(let i=0;i<n;i++){x=(x*9301+49297)%233280;const a=x/233280;x=(x*9301+49297)%233280;const b=x/233280;o+=`<circle cx="${(a*w).toFixed(0)}" cy="${(b*h*.65).toFixed(0)}" r="${(.4+b).toFixed(1)}" fill="#fff" opacity="${(.3+a*.6).toFixed(2)}"/>`}return o}
+function skyGround(W,H,gy,mars,id){
+  const sk=mars?["#241426","#7a4538"]:["#02040f","#18245a"],g1=mars?"#7d3f30":"#5c6082",g2=mars?"#4a261e":"#363a5c",g3=mars?"#9a5440":"#7a7fa3";
+  let o=`<defs><linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk[0]}"/><stop offset="1" stop-color="${sk[1]}"/></linearGradient><radialGradient id="${id}e" cx=".35" cy=".35"><stop offset="0" stop-color="#9fd0ff"/><stop offset="1" stop-color="#1e4fa8"/></radialGradient></defs>`;
+  o+=`<rect width="${W}" height="${H}" fill="url(#${id}s)"/>`+starsSVG(70,W,H,mars?7:3);
+  if(!mars)o+=`<circle cx="${W-90}" cy="55" r="26" fill="url(#${id}e)"/><path d="M${W-104},48 q10,-8 16,2 q-6,10 -16,-2z M${W-92},66 q10,-4 14,4 q-8,6 -14,-4z" fill="#4ade80" opacity=".7"/>`;
+  else o+=`<circle cx="${W-120}" cy="50" r="5" fill="#cbb7a0"/><circle cx="${W-90}" cy="70" r="3" fill="#cbb7a0"/>`;
+  o+=`<path d="M0,${gy-30} Q120,${gy-70} 260,${gy-25} T520,${gy-35} T${W},${gy-30} V${H} H0Z" fill="${g2}"/>`;
+  o+=`<rect x="0" y="${gy}" width="${W}" height="${H-gy}" fill="${g1}"/><path d="M0,${gy} H${W}" stroke="${g3}" stroke-width="2"/>`;
+  for(let i=0;i<7;i++){const cx=(i*137+60)%W,cy=gy+14+(i%3)*12;o+=`<ellipse cx="${cx}" cy="${cy}" rx="${22+i%3*8}" ry="${5+i%3*2}" fill="#000" opacity=".18"/>`}
+  return o}
+
+function landerSVG(){return `<path d="M-20,-6 L-34,0 M20,-6 L34,0" stroke="#cbd0e6" stroke-width="2.5"/><path d="M-16,-34 L16,-34 L22,-12 L-22,-12Z" fill="#e5e7eb"/><rect x="-22" y="-12" width="44" height="8" fill="#d6a23a"/><circle cx="0" cy="-24" r="5" fill="#60a5fa"/><path d="M-6,-4 L-9,2 H9 L6,-4Z" fill="#555"/>`}
+function habSVG(){return `<path d="M-40,0 A40,40 0 0 1 40,0Z" fill="#aab4d0"/><rect x="40" y="-22" width="26" height="22" fill="#8d96a3"/><circle cx="0" cy="-18" r="5" fill="#60a5fa"/><path d="M0,-40 V-58 M-8,-52 H8" stroke="#cbd0e6" stroke-width="2"/><rect x="74" y="-40" width="20" height="40" rx="7" fill="#aab4d0"/><rect x="77" y="-18" width="14" height="16" rx="3" fill="#4aa8ff"/>`}
+
+function planetBody(k,r){
+  const sh=`<circle r="${r}" fill="url(#hshade)"/>`;
+  if(k==="earth")return `<circle r="${r}" fill="#2a6fdb"/><path d="M-6,-4 q4,-6 9,-1 q-1,6 -7,6z M2,3 q4,-2 5,2 q-3,3 -5,-2z" fill="#3fae5a"/><circle cx="${r+7}" cy="-5" r="2.2" fill="#d6d6d6"/>${sh}`;
+  if(k==="jup")return `<circle r="${r}" fill="url(#hjup)"/><ellipse cx="6" cy="6" rx="4" ry="2.5" fill="#c4553a"/>${sh}`;
+  if(k==="sat")return `<ellipse rx="${r*2}" ry="${r*.55}" fill="none" stroke="#b9a273" stroke-width="5" transform="rotate(-18)"/><circle r="${r}" fill="url(#hsat)"/><ellipse rx="${r*2}" ry="${r*.55}" fill="none" stroke="#e3d2a1" stroke-width="3" transform="rotate(-18)" stroke-dasharray="${r*3.2} ${r*9}" stroke-dashoffset="${-r*3.4}"/>${sh}`;
+  return `<circle r="${r}" fill="${k}"/>${sh}`}
+function home(){
+  const P=[["Mercury",90,5,"#9b9b9b",9],["Venus",130,9,"#e8c27a",15],["Earth",175,10,"earth",22],["Mars",220,7,"#c1440e",32],["Jupiter",290,22,"jup",60],["Saturn",365,17,"sat",90],["Uranus",420,12,"#7fe0e6",130],["Neptune",468,12,"#3b5bdb",170]];
+  const rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let o=`<svg viewBox="0 0 1000 1000" class="solar" role="img" aria-label="The solar system with the planets in order from the Sun"><defs>
+   <radialGradient id="hsun"><stop offset="0" stop-color="#fff6c2"/><stop offset=".55" stop-color="#ffc83d"/><stop offset="1" stop-color="#ff8a1f"/></radialGradient>
+   <radialGradient id="hglow"><stop offset="0" stop-color="#ffb347" stop-opacity=".55"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+   <radialGradient id="hshade" cx=".32" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".65"/></radialGradient>
+   <linearGradient id="hjup" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b38a62"/><stop offset=".2" stop-color="#ead5b2"/><stop offset=".38" stop-color="#b07f55"/><stop offset=".55" stop-color="#e8d2b0"/><stop offset=".72" stop-color="#a8774f"/><stop offset=".88" stop-color="#dcc7a5"/><stop offset="1" stop-color="#b38a62"/></linearGradient>
+   <linearGradient id="hsat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cdb27a"/><stop offset=".4" stop-color="#ecdcae"/><stop offset=".7" stop-color="#c9ad76"/><stop offset="1" stop-color="#e2cf9c"/></linearGradient></defs>`;
+  o+=`<circle cx="500" cy="500" r="90" fill="url(#hglow)"/><circle cx="500" cy="500" r="36" fill="url(#hsun)"><title>Sun</title></circle>`;
+  P.forEach(([n,R,r,k,dur],i)=>{
+    const a=(i*47)%360;
+    o+=`<circle cx="500" cy="500" r="${R}" fill="none" stroke="#fff" stroke-opacity=".14"/>`;
+    o+=`<g transform="rotate(${a} 500 500)">${rm?"":`<animateTransform attributeName="transform" type="rotate" from="${a} 500 500" to="${a+360} 500 500" dur="${dur}s" repeatCount="indefinite"/>`}<g transform="translate(${500+R},500)"><title>${n}</title>${planetBody(k,r)}</g></g>`});
+  return o+`</svg>`}
+
+
+/* ============ MATERIALS ============ */
+const MAT={
+ a:{k:"alu",n:"Aluminum alloy",icon:"🔩",time:1,power:1,units:1,str:6,shield:1,therm:2,d:"Light and easy to work. The default backbone (ISS, Apollo)."},
+ t:{k:"ti",n:"Titanium alloy",icon:"⚙️",time:1.25,power:1.2,units:.7,str:9,shield:1,therm:2,d:"Very strong for its weight. Slow and power-hungry to work."},
+ s:{k:"steel",n:"Stainless steel",icon:"🛠️",time:1.1,power:1,units:1.4,str:8,shield:3,therm:3,d:"Durable and a good radiation shield, but heavy: needs more units."},
+ h:{k:"honey",n:"Honeycomb panels",icon:"🍯",time:.9,power:.9,units:.8,str:7,shield:1,therm:4,d:"Stiff, light and well insulated: a metal core between thin sheets."},
+ c:{k:"carbon",n:"Carbon fiber",icon:"🕸️",time:.8,power:.8,units:.6,str:7,shield:0,therm:3,d:"Lightest and fastest to build, but gives no radiation shielding."},
+ r:{k:"reg",n:"Regolith bricks",icon:"🧱",time:1.6,power:1.4,units:1.2,str:5,shield:4,therm:5,d:"Made on the Moon. Slow to sinter and power-hungry, but great shielding and insulation."}
+};
+const MATK={alu:["🔩","Aluminum"],ti:["⚙️","Titanium"],steel:["🛠️","Steel"],honey:["🍯","Honeycomb"],carbon:["🕸️","Carbon fiber"],reg:["🧱","Regolith bricks"],kap:["✨","Kapton/Mylar"],elec:["🔌","Electronics"]};
+const MATL=Object.fromEntries(Object.entries(MAT).map(([l,m])=>[m.k,l]));
+const CATC={P:["#2f6bd8","#173d96"],L:["#e2e6f0","#7b8396"],W:["#9fd0ff","#2860b8"],F:["#9fe7a5","#2d6a3a"],H:["#d6dae8","#6b7390"],M:["#f4f6ff","#c3cbe6"],S:["#c7d2fe","#4f46e5"],C:["#f1f3fa","#9aa0b8"],T:["#f87171","#7f1d1d"],I:["#fbbf24","#b45309"],D:["#a69880","#5f5444"],G:["#d1d5db","#4b5563"]};
+const CATN={P:"Power",L:"Life support",W:"Water",F:"Food",H:"Crew quarters",M:"Medical",S:"Science",C:"Communications",T:"Transport",I:"Mining & manufacturing",D:"Radiation & dust defense",G:"Storage & tools"};
+function fxText(fx){const nm={power:"⚡ power",spower:"⚡ power on sunlit days",o2:"🫧 oxygen",water:"💧 water",food:"🍲 food",health:"❤️ health",morale:"🙂 morale",sp:"⭐ Science Points",radd:"☢️ mSv per day",dustd:"🌫️ panel dust per day",armor:"🛡️ shelter armor (once)",cap:"🔋 power storage",m_alu:"🔩 aluminum",m_ti:"⚙️ titanium",m_steel:"🛠️ steel",m_honey:"🍯 honeycomb",m_carbon:"🕸️ carbon fiber",m_reg:"🧱 regolith bricks",m_kap:"✨ Kapton",m_elec:"🔌 electronics"};const o=[];for(const k in fx){const v=fx[k];if(k==="walk")o.push("trips outside cost "+Math.round(v*100)+"% less");else if(k==="prot")o.push("event damage −"+Math.round(v*100)+"%");else if(k==="warn")o.push("radiation storm dose −"+Math.round(v*100)+"%");else if(k==="eva")o.push("EVA incidents −"+Math.round(v*100)+"%");else if(k==="buildx")o.push("build time −"+Math.round(v*100)+"%");else if(k==="cargo")o.push("+"+v+" extra cargo drop a day");else o.push((v>0?"+":"")+v+" "+(nm[k]||k)+(k.startsWith("m_")?" a day":""))}return o.join(", ")}
+const MODROWS=[
+// key|name|icon|cat|shape|effects|units|materials(UPPERCASE = fixed material and fixed time)|extras k=Kapton e=electronics|hours|power per hour|max|note
+"solar|Solar array extension|☀️|P|panel|spower:10|3|ahc|e2|3|2|3|Panels only work on sunlit days.",
+"solar2|Large solar farm|🌞|P|panel|spower:22|6|ahc|e4|6|3|2|A big field of panels. Dust is the enemy.",
+"conc|Solar concentrator|🔆|P|dish|spower:16|4|at|e3|5|3|2|Mirrors focus sunlight onto a collector.",
+"kilo|Kilopower fission reactor|☢️|P|reactor|power:36,radd:0.1|5|T|k2e4|8|4|2|NASA's Kilopower tests showed small reactors can run for years without sunlight.",
+"fsp|Fission surface power plant|⚛️|P|reactor|power:60,radd:0.3|8|S|k3e6|12|5|1|NASA's Fission Surface Power project aims for about 40 kilowatts on the Moon.",
+"fuelcell|Regenerative fuel cell|🔋|P|tank|power:12,cap:60|4|ahs|e2|4|2|2|Stores energy for the long night.",
+"battery|Battery bank|🔌|P|box|power:4,cap:40|3|ahs|e3|3|2|3|More storage means less panic in the dark.",
+"rtg|Radioisotope heater|🔥|P|tank|power:14,radd:0.05|3|T|k1e3|5|3|2|Apollo science stations ran on a radioisotope generator.",
+"heatstore|Regolith heat battery|♨️|P|mound|power:8|4|R|k1|4|2|2|Hot regolith can store heat for the night.",
+"bus|Power bus upgrade|🔧|P|box|power:5|2|ash|e4|2|1|2|Better wiring wastes less power.",
+"mast|Sun-tracking mast|📍|P|mast|spower:8|2|ahc|e2|2|1|2|Panels that follow the Sun make more power.",
+"cable|Cable network|〰️|P|mast|power:3,prot:0.02|1|ahc|e5|2|1|2|Redundant cables mean fewer blackouts.",
+"pbeam|Power beaming receiver|📡|P|dish|power:18|4|at|e5,k2|6|3|1|NASA studies beaming power by laser or microwave (concept).",
+"scrub|Extra air scrubber|🫧|L|tank|o2:8|2|ahs|e1|2|1|2|Removes carbon dioxide from cabin air.",
+"cdra|CO2 removal assembly|💨|L|tank|o2:6,health:1|3|as|e3|3|2|2|Like the ISS Carbon Dioxide Removal Assembly.",
+"oga|Oxygen generator|⚗️|L|box|o2:10,power:-4|3|aths|e3|3|2|2|Splits water into oxygen, like the ISS Oxygen Generation Assembly.",
+"moxie|Regolith oxygen plant|🏭|L|box|o2:12,power:-6|3|ats|e4|4|3|2|About 40% of moon rock is oxygen. MOXIE made oxygen on Mars.",
+"sabatier|Sabatier reactor|🔄|L|tank|o2:6,water:4|3|as|e3|3|2|1|The ISS uses a Sabatier reactor to recover water from CO2.",
+"hepa|HEPA air filter|🌬️|L|box|health:2,dustd:-4|2|ahc|e2|2|1|2|Traps sharp lunar dust that gets inside.",
+"fans|Cabin fans|🌀|L|box|o2:3,morale:1|1|ahc|e1|1|1|2|Moving air keeps CO2 from pooling.",
+"fire|Fire suppression|🧯|L|tank|prot:0.04|2|as|e1|2|1|2|Fire is deadly in a sealed habitat (Mir, 1997).",
+"leak|Leak detector|🔍|L|mast|prot:0.05|1|ac|e3|1|1|2|Hear the hiss before it is too late.",
+"o2tank|Emergency oxygen tanks|🛢️|L|tank|o2:4|2|s|e0|2|1|3|Spare air for a bad day.",
+"humid|Humidity control|💧|L|box|health:1,morale:1|2|ah|e2|2|1|2|Comfortable air makes a calmer crew.",
+"trace|Trace contaminant control|🧪|L|box|health:2|2|as|e3|3|1|1|Filters tiny amounts of harmful gases.",
+"extract|Ice-water extractor|💧|W|tank|water:8|3|ats|e2|3|2|2|Melts polar ice. LCROSS found water in Cabeus crater in 2009.",
+"recycler|Water recycler|♻️|W|box|water:10,power:-3|3|ahs|e4|4|2|2|The ISS recycles about 98% of its water.",
+"wtank|Water tank|🪣|W|tank|water:3|2|ahs|e0|2|1|3|Storage means fewer emergencies.",
+"iceminer|Ice drilling rig|⛏️|W|mast|water:12,power:-4|4|ts|e3|5|3|1|Drills into frozen regolith.",
+"purifier|Water purifier|🚰|W|box|water:4,health:1|2|ah|e3|2|1|2|Clean water keeps people healthy.",
+"condenser|Humidity condenser|🌫️|W|box|water:5|2|ah|e2|2|1|2|Collects water from cabin air.",
+"grey|Greywater loop|🔁|W|box|water:6,power:-2|2|ahc|e3|2|1|2|Reuse every drop.",
+"wwall|Water wall shelter|🧊|D|mound|armor:1,water:-2|4|ahs|e0|4|2|2|Water is a good shield against radiation.",
+"green|Greenhouse dome|🌱|F|dome|food:8,morale:2|4|ahc|k2e2|5|2|2|ISS crews have eaten lettuce grown on station.",
+"hydro|Hydroponics rack|🥬|F|box|food:12,power:-3|3|ahc|e3|4|2|2|Grow lights use power.",
+"algae|Algae bioreactor|🧫|F|tank|food:7,o2:3|3|ac|e3|3|2|2|Algae make food and oxygen.",
+"kitchen|Galley expansion|🍳|F|box|food:3,morale:3|2|ahc|e2|2|1|2|A hot meal is a morale boost.",
+"freezer|Food freezer|❄️|F|box|food:5,power:-2|2|as|e2|2|1|2|Less food spoils.",
+"mush|Mushroom farm|🍄|F|box|food:6|2|ahr|e1|2|1|2|Grows well in the dark.",
+"seed|Seed vault|🌰|F|box|food:2,morale:1|1|a|e1|1|1|1|Hope in a box.",
+"apha|Advanced plant habitat|🪴|F|dome|food:10,sp:2,power:-4|4|ath|k2e5|6|3|1|Like NASA's Advanced Plant Habitat on the ISS.",
+"rec|Rec room|🎮|H|dome|morale:5|3|ahc|k1e2|3|1|2|Games and music.",
+"bunk|Extra bunk room|🛏️|H|box|morale:2,health:2|2|ahc|k1e1|2|1|3|Good sleep matters.",
+"mess|Mess hall|🍽️|H|box|morale:4,food:1|3|ahc|e2|3|1|2|Eating together helps.",
+"quiet|Quiet room|🧘|H|dome|morale:4,health:1|2|ahcr|k1|2|1|2|A place to be alone.",
+"cupola|Earth-view dome|🌍|H|dome|morale:5|3|aths|k1|3|1|2|Like the ISS Cupola, a favorite window.",
+"laundry|Laundry|🧺|H|box|morale:2,dustd:-2|1|ah|e1|1|1|1|Clean clothes, less dust.",
+"bath|Hygiene module|🚿|H|box|health:2,morale:1,water:-2|2|ah|e1|2|1|2|Keeps germs down.",
+"inflat|Inflatable habitat|🎈|H|dome|morale:3,health:1|3|C|k4e1|5|2|2|Like the ISS BEAM, a fabric module that expands.",
+"wing|Large habitat wing|🏠|H|dome|morale:6,health:2|8|ash|k3e3|10|4|1|Real living space.",
+"sleep|Sleep pods|😴|H|box|health:3,morale:2|2|ahc|k1e2|2|1|2|Quiet, dark and warm.",
+"medbay|Medical annex|🩺|M|box|health:4|3|ah|e3|3|2|2|A proper clinic.",
+"gym2|Exercise module|🏋️|M|box|health:3,morale:2,power:-2|3|as|e2|3|2|2|Like the ISS ARED. Astronauts exercise about 2 hours a day.",
+"telemed|Telemedicine station|📞|M|box|health:2,morale:1|2|ah|e3|2|1|2|Flight surgeons on the radio.",
+"pharm|Pharmacy|💊|M|box|health:2|1|a|e1|1|1|2|Medicine cabinet.",
+"radclinic|Radiation clinic|🩻|M|box|health:2,radd:-0.4|3|ash|e3|3|2|1|Treats the effects of radiation exposure.",
+"bone|Bone-density scanner|🦴|M|box|health:2|2|ah|e3|2|1|1|Catches bone loss early (about 1% a month in orbit).",
+"scope|Observatory dome|🔭|S|dome|sp:4|3|ahc|e3|4|2|2|Stars without twinkle.",
+"seis|Seismometer array|📈|S|mast|sp:2,prot:0.1|2|ac|e3|2|1|2|Apollo seismometers recorded moonquakes.",
+"lab|Sample analysis lab|🧪|S|box|sp:5|3|ahc|e4|4|2|2|Study your rocks.",
+"geo|Geology lab|🪨|S|box|sp:4|3|ahs|e3|3|2|2|Read the Moon's history.",
+"drill|Core drill rig|🔩|S|mast|sp:3|3|ts|e3|4|3|2|Drill cores keep rock layers in order.",
+"spectro|Spectrometer|🌈|S|box|sp:3|1|ac|e4|2|1|2|Reads light fingerprints of minerals.",
+"radmon|Radiation monitor network|📟|S|mast|sp:2,warn:0.1|1|ac|e4|2|1|2|Warns before a radiation storm hits.",
+"wx|Weather station|🌡️|S|mast|sp:2|1|ac|e2|1|1|2|Space weather and surface temperature.",
+"crd|Cosmic ray detector|🌌|S|mast|sp:3,warn:0.05|1|ac|e4|2|1|1|Counts high-energy particles.",
+"massspec|Mass spectrometer|⚖️|S|box|sp:4|2|ac|e5|3|2|1|Identifies gases and elements.",
+"radiotel|Radio telescope|📻|S|dish|sp:5|4|at|e4|5|3|1|The Moon is quiet for radio astronomy.",
+"micro|Microscope lab|🔬|S|box|sp:3|2|ah|e3|2|1|2|Look at the tiny sharp grains of lunar dust.",
+"dsn|Deep space antenna|📡|C|dish|morale:4,sp:2|3|at|e3|4|2|2|NASA's Deep Space Network keeps contact with spacecraft.",
+"relay|Relay uplink|🛰️|C|dish|morale:2,sp:1|2|ac|e3|2|1|2|Bounces signals around the Moon.",
+"laser|Laser comm terminal|🔦|C|dish|morale:3,sp:3|2|at|e4|3|2|1|NASA tested laser communication with its DSOC experiment.",
+"beacon|Navigation beacon|📍|C|mast|eva:0.05|1|ac|e2|1|1|2|Helps people find their way back.",
+"studio|Outreach studio|🎙️|C|box|morale:3,sp:1|2|ah|e2|2|1|1|Talk to schools on Earth.",
+"intercom|Intercom network|🔔|C|mast|morale:1,prot:0.02|1|ac|e2|1|1|1|Hear everyone, everywhere.",
+"ltv|Lunar Terrain Vehicle garage|🚙|T|box|walk:0.5|4|ats|e4|5|3|1|NASA's Artemis Lunar Terrain Vehicle will carry astronauts.",
+"rover|Pressurized rover bay|🚐|T|box|walk:0.1,eva:0.1|4|as|e4|5|3|1|A rover astronauts can live in for days.",
+"crane|Cargo crane|🏗️|T|mast|buildx:0.1|2|as|e2|3|2|2|Lifts heavy parts. Faster building.",
+"tractor|Tow tractor|🚜|T|box|eva:0.05|2|as|e2|2|1|1|Rescues stuck vehicles.",
+"pad2|Second landing pad|🛬|T|box|cargo:1|3|ahsr|e1|3|2|1|More cargo can land.",
+"fuel|Fuel depot|⛽|T|tank|power:5|3|as|e2|3|2|1|Stores propellant.",
+"track|Rover track|🛤️|T|mast|walk:0.08|2|ar|e0|2|1|1|A smooth road saves time.",
+"miner|Regolith miner|🚧|I|box|m_reg:4,power:-3|3|as|e3|3|2|2|Digs up Moon soil for bricks.",
+"sinter|Sintering oven|🔥|I|box|m_reg:2,power:-3|3|as|e3|3|2|1|Bakes dust into bricks.",
+"almet|Aluminum extractor|⚙️|I|box|m_alu:3,power:-4|4|as|e4|5|3|2|Moon rock contains aluminum.",
+"timet|Titanium extractor|🔱|I|box|m_ti:2,power:-5|4|ts|e5|6|3|1|Ilmenite is rich in titanium.",
+"steelm|Iron smelter|🏭|I|box|m_steel:3,power:-5|4|as|e4|5|3|1|Makes steel from Moon iron.",
+"glassm|Honeycomb press|🍯|I|box|m_honey:2,power:-3|3|ah|e3|3|2|1|Makes honeycomb panels on site.",
+"elecf|Electronics workshop|🖥️|I|box|m_elec:2,power:-3|3|ah|e2|3|2|2|Makes wiring and circuits.",
+"print|Regolith 3D printer|🖨️|I|box|armor:1,m_reg:1|3|ash|e3|4|3|1|NASA is researching 3D-printed lunar structures.",
+"brick|Brick press|🧱|I|box|m_reg:3|2|as|e2|2|1|2|Squeezes dust into bricks.",
+"electro|Molten regolith electrolysis|⚡|I|box|o2:6,m_steel:1,power:-6|4|ts|e5|6|4|1|Researchers study melting regolith to get oxygen and metal.",
+"shelter|Radiation shelter|🛡️|D|mound|armor:1|3|R|e0|4|2|2|Thick regolith blocks most radiation.",
+"vault|Storm vault|🏛️|D|mound|armor:1,radd:-0.2|4|R|e0|5|2|1|A buried room for solar storms.",
+"berm|Regolith berm|⛰️|D|mound|armor:1|4|R|e0|4|2|2|A wall of dirt around the base.",
+"magnet|Magnetic shield (concept)|🧲|D|dish|radd:-0.5,power:-6|3|at|e6|6|4|1|Scientists have proposed magnetic shields (concept).",
+"flare|Flare alarm|🚨|D|mast|warn:0.15|1|ac|e3|1|1|1|An early warning gives you time to shelter.",
+"mshield|Meteoroid shield|☄️|D|box|prot:0.08|3|ts|e0|3|2|2|Bumper plates stop tiny fast rocks.",
+"fence|Dust fence|🚧|D|mast|dustd:-6|2|ac|e1|2|1|2|Keeps blowing dust off the panels.",
+"eds|Electrodynamic dust shield|⚡|D|panel|dustd:-12|2|ac|e4|3|2|1|NASA's electrodynamic dust shield repels dust with an electric field.",
+"brush|Panel cleaning robot|🤖|D|box|dustd:-10|2|ac|e3|3|2|1|Does the brushing for you.",
+"washer|Airlock dust wash|🚿|D|box|health:1,dustd:-4|2|ah|e2|2|1|1|Wash off dust before coming inside.",
+"depot|Supply depot|📦|G|box|cargo:1|3|ahs|e0|3|2|1|More room for deliveries.",
+"shed|Tool shed|🧰|G|box|buildx:0.1|2|ahs|e0|2|1|1|The right tool saves time.",
+"spare|Spare parts bin|🔧|G|box|prot:0.04|1|ahs|e1|1|1|2|Fix it faster."
+];
+const MODK={};
+MODROWS.forEach(r=>{const f=r.split("|"),[key,n,icon,cat,sh,fxs,units,alw,ext,hrs,pwr,max,note]=f,fx={};
+  fxs.split(",").filter(Boolean).forEach(p=>{const q=p.split(":");fx[q[0]]=parseFloat(q[1])});
+  const e={};ext.replace(/([ke])(\d+)/g,(_,a,b)=>{e[a]=+b});
+  MODK[key]={key,n,icon,cat,sh,c:CATC[cat],fx,units:+units,allowed:alw.toLowerCase().split(""),fixed:/[A-Z]/.test(alw),k:e.k||0,e:e.e||0,hours:+hrs,pwr:+pwr,max:+max||2,note:note||"",d:fxText(fx)+(note?". "+note:"")}});
+const MODMAX=2;
+const sumFx=k=>S.modules.reduce((a,m)=>a+((MODK[m.t]&&MODK[m.t].fx[k])||0),0);
+const sumMat=p=>S.modules.reduce((a,m)=>a+((MAT[m.mat]&&MAT[m.mat][p])||0),0);
+function planBuild(key,L,buried){
+  const M=MODK[key],m=MAT[L];if(!M||!m)return null;
+  const units=Math.max(1,Math.ceil(M.units*m.units));
+  let hrs=M.fixed?M.hours:M.hours*m.time*(buried?1.25:1)*(1-Math.min(.4,sumFx("buildx")));
+  if(!M.fixed&&L==="r"&&S.modules.some(x=>x.t==="print"))hrs*=.8;
+  hrs=Math.max(1,Math.ceil(hrs-1e-9));
+  const pwr=Math.round(M.pwr*(M.fixed?1:m.power)*10)/10,needs={};needs[m.k]=units;if(M.k)needs.kap=M.k;if(M.e)needs.elec=M.e;
+  return {units,hrs,pwr,needs,total:Math.round(hrs*pwr*10)/10}}
+const MATSTART={alu:10,ti:3,steel:6,honey:5,carbon:4,reg:8,kap:5,elec:8};
+function matText(o){return Object.entries(o).map(([k,v])=>MATK[k][0]+" "+v+" "+MATK[k][1]).join(", ")}
+function searchMods(q){
+  q=(q||"").toLowerCase().trim();if(!q)return [];
+  const toks=q.split(/\s+/);
+  const sc=[];for(const k in MODK){const M=MODK[k],hay=(M.n+" "+CATN[M.cat]+" "+M.note+" "+k+" "+M.d).toLowerCase(),nm=M.n.toLowerCase();let s=0;
+    for(const t of toks){if(nm.includes(t))s+=10;if(nm.startsWith(t))s+=4;if(k.startsWith(t))s+=5;if(hay.includes(t))s+=3;else{const w=hay.split(/[^a-z0-9]+/);if(w.some(x=>x.length>3&&t.length>3&&(x.startsWith(t.slice(0,4))||t.startsWith(x.slice(0,4)))))s+=1}}
+    if(s>0)sc.push([s,M])}
+  return sc.sort((a,b)=>b[0]-a[0]).map(x=>x[1])}
+
+/* ============ STATE ============ */
+function fresh(){return {mode:null,phase:"home",day:1,res:{o2:100,water:100,food:100,power:100,health:100,morale:80},rad:0,dust:0,armor:0,buried:0,energy:14,penalty:0,sp:0,done:{},samples:[],loaded:[],modules:[],projects:[],mat:Object.assign({},MATSTART),orders:[],poi:{},seen:[],evLog:[],ev:null,report:null,over:null,log:[],alert:0,lastRad:-9,tab:"maintain",hist:[],train:{i:0,score:0,done:false}}}
+let S=(function(){try{const t=localStorage.getItem(SAVE_KEY);if(t)return Object.assign(fresh(),JSON.parse(t))}catch(e){}return fresh()})();
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
+const MD=()=>MODES[S.mode||"junior"];
+const siteOf=()=>SITE;
+const isDark=d=>{const s=siteOf();return d>=s.dark[0]&&d<=s.dark[1]};
+const sunUp=()=>!isDark(S.day);
+const mods=t=>S.modules.filter(m=>m.t===t).length;
+const capP=()=>100+sumFx("cap");
+const armorEff=()=>Math.min(3,S.armor+.5*S.buried+.03*sumMat("shield"));
+const shieldF=()=>Math.max(.3,1-.15*armorEff());
+let V="home",Q=null;
+function toast(msg){const t=$("#toast");t.innerHTML='<div class="toast">'+esc(msg)+'</div>';clearTimeout(toast.t);toast.t=setTimeout(()=>t.innerHTML="",3200)}
+function log(m){S.log.unshift(m);S.log=S.log.slice(0,10)}
+function go(v){V=v;render();window.scrollTo(0,0)}
+function clampRes(){for(const k in S.res){const v=Math.round(S.res[k]);S.res[k]=k==="power"?clamp(v,0,capP()):clamp(v)}}
+function applyFx(fx,sev,prot){
+  let out=[];
+  for(const k in fx){let v=fx[k];
+    if(k==="e"){S.penalty+=v;out.push("⏱️ -"+v+"h tomorrow");continue}
+    if(k==="armor"){S.armor=Math.min(3,S.armor+v);continue}
+    if(k==="dust"){const b=S.dust;S.dust=clamp(S.dust+v);if(v!==0)out.push("🌫️ dust "+(v>0?"+":"")+Math.round(S.dust-b));continue}
+    if(k==="delay"){S.orders.forEach(o=>o.arrive+=v);if(S.orders.length)out.push("📦 deliveries delayed "+v+" day");continue}
+    if(k==="rad"){const d=Math.round(v*MD().radm*(v>0?shieldF()*siteOf().radf*(1-Math.min(.5,sumFx("warn"))):1)*10)/10;S.rad=Math.max(0,Math.round((S.rad+d)*10)/10);if(d)out.push("☢️ "+(d>0?"+":"")+d+" mSv");continue}
+    if(v<0&&sev)v=Math.round(v*sev*(prot?1-.25*armorEff():1)*(1-Math.min(.5,sumFx("prot")+Math.min(.2,sumMat("str")*.0015))));
+    S.res[k]=k==="power"?clamp(S.res[k]+v,0,capP()):clamp(S.res[k]+v);
+    if(v)out.push(RIC[k]+" "+(v>0?"+":"")+v)}
+  clampRes();return out.join("  ")}
+const unlockDay=a=>({1:1,2:3,3:5,4:8})[a[4]]||1;
+
+const CH=[
+ {id:"o2",icon:"🫧",n:"Service the oxygen scrubbers",e:1,fx:{o2:14},ctx:"The ISS uses machines to pull out CO2 and make oxygen. They need regular care.",fact:"Apollo 13 crews once rigged a CO2 filter from duct tape and a sock-like hose. Scrubbers matter."},
+ {id:"water",icon:"💧",n:"Recycle water",e:1,fx:{water:12},ctx:"The ISS recycles about 90% of its water, even from sweat and breath.",fact:"Every litre of water launched costs a fortune, so crews reuse almost everything."},
+ {id:"food",icon:"🍲",n:"Cook a meal and tend the plants",e:1,fx:{food:12,morale:3},ctx:"Fresh salad has been grown and eaten on the ISS. Good food lifts mood too.",fact:"Growing plants cleans the air and gives fresh food on long trips."},
+ {id:"dust",icon:"🧹",n:"Brush dust off the solar panels",e:1,fx:{dust:-100},ctx:"Dust on Opportunity's panels slowly starved it of power.",fact:"Clean panels make far more power. Dust is one of the biggest problems on the Moon and Mars."},
+ {id:"gym",icon:"🏋️",n:"Exercise",e:1,fx:{health:9,power:-2},ctx:"Astronauts work out about 2 hours a day to protect bones and muscles.",fact:"Low gravity makes bones and muscles weaker unless they are used."},
+ {id:"call",icon:"📞",n:"Call home",e:1,fx:{morale:12,power:-2},ctx:"Radio takes about 1.3 seconds each way between the Moon and Earth.",fact:"Talking with family and friends is a real part of astronaut mental health."},
+ {id:"med",icon:"🩺",n:"Medical check",e:1,fx:{health:6},ctx:"Crews send health data to doctors on Earth.",fact:"Flight surgeons watch heart rate, sleep and bone health from the ground."},
+ {id:"rest",icon:"🌍",n:"Rest and look at Earth",e:1,fx:{morale:8,health:2},ctx:"Astronauts say the view of Earth keeps them going on long missions.",fact:"Rest is not wasted time. Tired crews make mistakes."},
+ {id:"power",icon:"🔋",n:"Tune the battery bank",e:1,fx:{power:10},ctx:"Batteries store solar energy for the long lunar night and need balancing.",fact:"Lunar nights last about two weeks, so power storage is a life-or-death system."},
+ {id:"shelter",icon:"🧱",n:"Pile regolith bags on the shelter",e:2,fx:{armor:1,power:-3},max:3,ctx:"Moon dust is a great shield against radiation and tiny meteoroids.",fact:"Thick layers of regolith cut radiation and micrometeorite damage."},
+ {id:"isru",icon:"⚗️",n:"Make oxygen from moon rock",e:3,fx:{o2:30,power:-12},ctx:"Moon rock is about 40% oxygen by mass. Perseverance's MOXIE made oxygen on Mars.",fact:"Making supplies on site means launching less from Earth."}
+];
+const SUP=[
+ {n:"Emergency supply drop",cost:25,fx:{o2:20,water:20,food:20},ctx:"Mission Control launches a cargo ship."},
+ {n:"Repair kit",cost:15,fx:{power:22,dust:-100},ctx:"Spare cables and a dust-proof panel brush."},
+ {n:"Doctor advice from Earth",cost:20,fx:{health:25,morale:10},ctx:"A flight surgeon talks you through treatment."}
+];
+const EV=[
+ {id:"dust",icon:"🌪️",title:"Dust storm",text:"A dust storm rolls over the outpost. The solar panels are covered in a thick layer of dust.",prot:false,
+  opts:[{l:"Wait it out",ctx:"Save energy, but dust cuts solar power, as it did for Opportunity.",fx:{dust:40,power:-12}},{l:"Brush panels in the storm",ctx:"Costs tomorrow's energy, but keeps some power flowing.",fx:{dust:10,power:-5,e:2}}],
+  real:["Opportunity (Mars)","A giant dust storm in 2018 blocked sunlight and ended Opportunity's mission. Solar power needs a plan for dust."]},
+ {id:"flare",icon:"☀️",title:"Solar flare",text:"Your radiation badge beeps. A solar flare is sending high-energy particles toward the Moon.",prot:true,
+  opts:[{l:"Shelter in the storm cellar all night",ctx:"Safe, but cramped and stressful.",fx:{health:-4,morale:-8}},{l:"Keep working and trust the badge",ctx:"You get more done but take the dose.",fx:{health:-22}}],
+  real:["Apollo era","A huge flare in August 1972 fell between Apollo 16 and 17. Crews on the Moon would have needed shelter."]},
+ {id:"meteor",icon:"☄️",title:"Micrometeorite hit",text:"A pea-sized rock crashes into the habitat wall at high speed and a tiny leak whistles.",prot:true,
+  opts:[{l:"Patch the leak now",ctx:"Costs tomorrow's energy but saves air.",fx:{o2:-6,e:1}},{l:"Wait until morning",ctx:"You keep resting while air leaks out.",fx:{o2:-22}}],
+  real:["International Space Station","Tiny space rocks hit the ISS often. In 2018 a small hole in a Soyuz was patched while in orbit."]},
+ {id:"co2",icon:"🌫️",title:"Scrubber fault",text:"The CO2 scrubber stops. The air starts to feel stuffy and your head aches.",prot:false,
+  opts:[{l:"Rig a filter from spare parts",ctx:"Clever but slow. The Apollo 13 crew did this.",fx:{o2:-5,morale:4,e:1}},{l:"Switch to the backup unit",ctx:"Works, but it burns lots of power.",fx:{power:-18,o2:-2}}],
+  real:["Apollo 13","In 1970 the crew built a CO2 filter from a command module canister, a hose and duct tape, following instructions from Earth."]},
+ {id:"cold",icon:"🥶",title:"Heater fault",text:"The lunar night is closing in at about -170 °C and one heater stops working.",prot:false,
+  opts:[{l:"Everyone shares one warm room",ctx:"Low power, but crowded and stressful.",fx:{morale:-6,power:-5,health:-4}},{l:"Run the backup heater",ctx:"Cozy, but it burns power.",fx:{power:-22}}],
+  real:["Chang'e 4 and Pragyan","Lunar nights last about two weeks. Rovers must stay warm to survive, using heaters or radioisotope heat sources."]},
+ {id:"quake",icon:"🌋",title:"Moonquake",text:"The ground shakes for several minutes. Pipes rattle and a storage rack topples.",prot:true,
+  opts:[{l:"Check all the seals right now",ctx:"Costs tomorrow's energy.",fx:{water:-4,e:1}},{l:"Go back to sleep",ctx:"You rest, but leaks keep running.",fx:{water:-16,o2:-8}}],
+  real:["Apollo seismometers","Apollo instruments recorded moonquakes. In 1969 the Moon rang like a bell for more than an hour."]},
+ {id:"comms",icon:"📡",title:"Radio blackout",text:"A solar storm cuts the link to Earth. Mission Control cannot hear you.",prot:false,
+  opts:[{l:"Follow the checklist alone",ctx:"Calm, but lonely.",fx:{morale:-5}},{l:"Try calling every hour",ctx:"Hope drains power and mood.",fx:{morale:-10,power:-6}}],
+  real:["Apollo and Artemis","Crews lose contact when behind the Moon. Astronauts are trained to run checklists on their own."]},
+ {id:"recycler",icon:"🚰",title:"Water recycler clog",text:"A filter in the water recycler is blocked. Water barely trickles out.",prot:false,
+  opts:[{l:"Clean the filter by hand",ctx:"Fix it properly, costs tomorrow's energy.",fx:{water:-4,e:1}},{l:"Ration water for the night",ctx:"No work, but you get thirsty.",fx:{water:-8,health:-8,morale:-3}}],
+  real:["International Space Station","The ISS water system is vital. Crews fix filters and pumps often."]},
+ {id:"blight",icon:"🥀",title:"Plant blight",text:"The salad plants have mold on them. Dinner is not looking good.",prot:false,
+  opts:[{l:"Throw it out and eat emergency rations",ctx:"Safe, but you lose a lot of food.",fx:{food:-14,morale:-6}},{l:"Eat the plants anyway",ctx:"Saves food but could make you sick.",fx:{food:-4,health:-18}}],
+  real:["ISS plant experiments","Veggie plant growth is tested on the ISS. Some plants have had mold, so crews must stay careful."]},
+ {id:"airlock",icon:"🧤",title:"Dust in the airlock",text:"Lunar dust has followed you inside. It is sharp, smells of gunpowder and itches your throat.",prot:false,
+  opts:[{l:"Vacuum thoroughly",ctx:"Costs tomorrow's energy.",fx:{health:-3,e:1}},{l:"Ignore it",ctx:"Dust gets into the air filters and your lungs.",fx:{health:-15,o2:-4}}],
+  real:["Apollo 17 (Gene Cernan)","Moon dust clung to suits, jammed seals and made astronauts cough. It is sharp because nothing ever wears it smooth."]},
+ {id:"short",icon:"⚡",title:"Short circuit",text:"A burnt smell. A power panel is sparking in the dark.",prot:false,
+  opts:[{l:"Isolate the broken circuit",ctx:"A careful fix, with a small power loss.",fx:{power:-8}},{l:"Reboot everything",ctx:"Quick, but the restart eats power and trust.",fx:{power:-18,morale:-4}}],
+  real:["Apollo 12","Apollo 12 was struck by lightning at launch, scrambling systems. Teams fixed it by resetting one switch."]},
+ {id:"homesick",icon:"💭",title:"A homesick night",text:"It is very quiet. You look up at the small blue Earth and feel far away.",prot:false,
+  opts:[{l:"Talk to family on the radio",ctx:"Costs a little power but helps a lot.",fx:{morale:10,power:-3}},{l:"Work through the night",ctx:"Keep busy, but exhaustion builds.",fx:{morale:-12}}],
+  real:["Long-duration astronauts","On long missions crews report loneliness. Space agencies schedule family calls and care packages."]},
+ {id:"static",icon:"🧲",title:"Electrostatic dust",text:"Moon dust is charged by sunlight and sticks to your suit, tools and camera lenses. Everything looks grey.",prot:false,
+  opts:[{l:"Brush every tool before using it",ctx:"Slow but it keeps equipment working.",fx:{health:-2,e:1}},{l:"Ignore it",ctx:"Dust gets into joints and lungs.",fx:{power:-8,health:-6}}],
+  real:["Apollo 17","Dust caked the rover and suits and wore through layers of the suits during Apollo 17's three moonwalks."]},
+ {id:"helmet",icon:"💦",title:"Suit leak",text:"During an outside task, cold water pools in your helmet and the visor fogs. Your suit is leaking.",prot:false,
+  opts:[{l:"Return to the airlock at once",ctx:"Safe, but you lose time.",fx:{morale:-4,e:1}},{l:"Finish the task first",ctx:"Risky. Water in a helmet can be dangerous.",fx:{health:-14,o2:-6}}],
+  real:["ISS spacewalk, 2013","Astronaut Luca Parmitano's helmet filled with water during a spacewalk and the spacewalk was ended early. Returning safely comes first."]},
+ {id:"alarm",icon:"🚨",title:"Computer alarm",text:"The base computer flashes a 1202 alarm and the lights flicker. You have to decide fast.",prot:false,
+  opts:[{l:"Trust Mission Control and continue",ctx:"Calm and quick. Controllers say it is okay to proceed.",fx:{morale:-3,power:-4}},{l:"Reset every system",ctx:"Safe but power-hungry.",fx:{power:-14,morale:-5}}],
+  real:["Apollo 11","A 1202 computer alarm went off during the Apollo 11 landing. Mission Control knew it was safe to continue and called 'Go'."]},
+ {id:"resupply",icon:"📦",title:"Supply ship delayed",text:"A cargo flight to the Moon is delayed. Mission Control asks you to stretch your food.",prot:false,
+  opts:[{l:"Cut meals by a quarter",ctx:"Saves food, lowers mood and health a little.",fx:{food:-4,morale:-6,health:-4}},{l:"Eat normally",ctx:"Comfortable, but supplies fall fast.",fx:{food:-14}}],
+  real:["ISS resupply","Cargo launches to the ISS sometimes slip. Crews carry reserves and ration carefully."]},
+ {id:"thermal",icon:"🌡️",title:"Thermal shock",text:"The walls creak as the surface heats or cools very quickly. Seals are under strain.",prot:true,
+  opts:[{l:"Inspect the seals now",ctx:"Costs tomorrow's energy.",fx:{o2:-4,e:1}},{l:"Wait it out",ctx:"A small leak could grow.",fx:{o2:-14,water:-6}}],
+  real:["NASA thermal data","The Moon's surface swings by about 300 °C between lunar day and night, so spacecraft need layered insulation."]},
+ {id:"frozen",icon:"🧊",title:"Frozen water line",text:"In the deep cold a water pipe freezes solid and the pump grinds.",prot:false,
+  opts:[{l:"Thaw it with heaters",ctx:"Costs a lot of power.",fx:{power:-14}},{l:"Drain it and use stored water",ctx:"Safe for the pipe, hard on supplies.",fx:{water:-14,morale:-3}}],
+  real:["Artemis thermal design","Lunar bases must keep water and fuel lines from freezing in the -173 °C night."]},
+ {id:"shower",icon:"🌠",title:"Micrometeoroid shower",text:"Tiny rocks rattle the roof like hail. On the Moon there is no air to slow them down.",prot:true,
+  opts:[{l:"Stay inside the shelter room",ctx:"Safe but boring.",fx:{morale:-6}},{l:"Go check the outside gear",ctx:"You save equipment but risk a hit.",fx:{health:-10,power:-6}}],
+  real:["Moon impacts","Meteoroids hit the airless Moon at tens of kilometres per second, which is why shelters are covered with regolith."]},
+ {id:"lro",icon:"🛰️",title:"Orbiter fly-by",text:"NASA's Lunar Reconnaissance Orbiter passes overhead and offers to relay your report.",prot:false,
+  opts:[{l:"Send a full status report",ctx:"Costs a little power, lifts spirits.",fx:{morale:8,power:-2}},{l:"Skip it",ctx:"Save power, miss the contact.",fx:{morale:-2}}],
+  real:["Lunar Reconnaissance Orbiter","NASA's LRO has mapped the Moon from orbit since 2009, including the ice in its polar craters."]}
+
+];
+
+const SAMPLES=[
+ {id:"regolith",icon:"🟫",n:"Regolith",fact:"Lunar soil is sharp and glassy. It clung to Apollo suits, and Apollo 17's Harrison Schmitt described hay-fever-like symptoms from the dust."},
+ {id:"anorthosite",icon:"⚪",n:"Anorthosite",fact:"Apollo 15's 'Genesis Rock' (15415) is anorthosite about 4.1 billion years old, a piece of the Moon's original crust."},
+ {id:"basalt",icon:"⚫",n:"Mare basalt",fact:"Dark volcanic rock from the maria. Apollo missions found basalts roughly 3 to 3.5 billion years old, proof that lava once flooded the Moon."},
+ {id:"ilmenite",icon:"🔘",n:"Titanium basalt (ilmenite)",fact:"Apollo 11's basalts are rich in titanium, in the mineral ilmenite. Heating ilmenite with hydrogen can free oxygen for future crews."},
+ {id:"breccia",icon:"🟤",n:"Breccia",fact:"Broken fragments welded together by impacts. Apollo 14's 'Big Bertha' (14321) is a breccia of about 9 kg."},
+ {id:"glass",icon:"🟠",n:"Orange volcanic glass",fact:"Apollo 17's orange soil (74220) is mostly tiny glass beads about 40 to 60 microns wide, formed in lava fountains."},
+ {id:"kreep",icon:"🟧",n:"KREEP rock",fact:"KREEP is rich in potassium (K), rare earth elements (REE) and phosphorus (P). Apollo 14 and 15 found it. It is leftover magma-ocean material."},
+ {id:"ice",icon:"🧊",n:"Polar ice core",fact:"NASA's LCROSS mission (2009) detected water in the plume from Cabeus crater, and LRO data show ice in permanently shadowed polar craters."}
+];
+
+const FAIL={
+ o2:["Out of oxygen","Without air you cannot last more than minutes. Scrubbers, plants and making oxygen from moon rock keep crews alive. Real spacecraft have backup systems for exactly this."],
+ health:["Health collapsed","Radiation, cold, thirst and hunger wore your body down. Exercise, medical checks and shelter all matter on long missions."]
+};
+
+FAIL.rad=["Radiation limit exceeded","Too much radiation raises long-term health risks and can cause acute sickness. NASA sets exposure limits and shelters crews during solar particle events."];
+
+const WLOG=[
+ ["Log, night 2: The scrubbers are failing. Everyone has headaches and we are too tired to fix them.",{o2:15},"You find spare air canisters."],
+ ["Log, night 3: The panels are buried in dust. We kept waiting for the storm to pass.",{power:15},"You salvage a few working battery cells."],
+ ["Log, night 4: Flare alarm! We were all outside. We should have stayed near the shelter.",{health:10},"You find an intact medical kit."],
+ ["Log, night 3: A hiss at 3 a.m. The hull is leaking and the patch kit is in the other room.",{water:12},"You recover sealed water pouches."],
+ ["Log, night 6: The heaters died. It is -170 outside and the cold is coming through the walls.",{power:12},"You recover battery packs."],
+ ["Log, night 5: We stopped talking. Nobody wants to be the one who says it is over.",{morale:15},"You find a handwritten letter from home. It helps."]
+];
+
+const POIS=[
+ {id:"wreck1",kind:"wreck",n:1,x:1250,y:500,label:"Wreck of Outpost 1"},{id:"wreck2",kind:"wreck",n:2,x:1700,y:150,label:"Wreck of Outpost 2"},
+ {id:"wreck3",kind:"wreck",n:3,x:2300,y:600,label:"Wreck of Outpost 3"},{id:"wreck4",kind:"wreck",n:4,x:2250,y:1100,label:"Wreck of Outpost 4"},
+ {id:"wreck5",kind:"wreck",n:5,x:1350,y:1350,label:"Wreck of Outpost 5"},{id:"wreck6",kind:"wreck",n:6,x:500,y:1300,label:"Wreck of Outpost 6"},
+ {id:"site_anorthosite",kind:"site",type:"anorthosite",x:1500,y:230,label:"Bright highlands"},
+ {id:"site_basalt",kind:"site",type:"basalt",x:900,y:1050,label:"Dark lava plain"},
+ {id:"site_breccia",kind:"site",type:"breccia",x:1900,y:820,label:"Crater rim"},
+ {id:"site_glass",kind:"site",type:"glass",x:2450,y:1500,label:"Orange soil"},
+ {id:"ice",kind:"ice",x:300,y:950,label:"Shadowed ice crater"},
+ {id:"lava",kind:"lava",x:1900,y:1620,label:"Lava tube cave"},
+ {id:"site_kreep",kind:"site",type:"kreep",x:950,y:1600,label:"KREEP hills"},
+ {id:"site_ilmenite",kind:"site",type:"ilmenite",x:2550,y:250,label:"Titanium-rich plain"}
+];
+
+const STORIES=[
+ {n:1,name:"Pioneer",night:2,ev:"co2",crew:["Cmdr Ana Reyes","Eng. Tomas Okafor"],
+  head:"The first crew to try. They stayed too calm about the air.",
+  cause:"The oxygen scrubbers failed and carbon dioxide built up in the cabin.",
+  logs:[["Day 1.","Touchdown was perfect. Tomas hugged me so hard the suit squeaked. We named the base Pioneer and ate chocolate to celebrate."],["Day 2, evening.","Headaches for both of us. The scrubber alarm keeps chirping. Tomas says it is probably a loose sensor and I agreed. I did not want to spoil a good day."],["Night 2.","The alarm was right. The filter is saturated and the spare is stuck in a locker we cannot reach in the dark. If anyone reads this, check the scrubbers first. Always. Tell Earth we were happy."]],
+  real:["Apollo 13 (1970)","When carbon dioxide rose on Apollo 13, the crew built a filter from a command module canister, a hose and duct tape, following instructions from Earth. Air systems get checked first, every time."]},
+ {n:2,name:"Dustfall",night:3,ev:"dust",crew:["Cmdr Mei Lin Chen","Dr. Sam Adeyemi","Pilot Ruth Novak"],
+  head:"Three people, one storm, and a decision to wait it out.",
+  cause:"A dust storm buried the solar panels. The power ran out and the heaters stopped.",
+  logs:[["Day 2.","A grey haze rolled in from the east. Sam measured the dust on the panels: a thin coat. We decided brushing could wait until the sky cleared."],["Day 3.","The haze is a wall now. Power is at a third. Ruth wants to go out and brush the panels, but I said it was too risky in the storm."],["Night 3.","Power is gone. We are in the dark with our breath fogging the glass. We waited too long to clean the panels, and now we cannot go out. Do not be proud like me. Brush early."]],
+  real:["Opportunity (Mars)","A global dust storm in 2018 covered Opportunity's solar panels and ended its mission after nearly 15 years. Solar power needs a plan for dust."]},
+ {n:3,name:"Sunward",night:4,ev:"flare",crew:["Cmdr Jonas Weber","Geologist Priya Nair"],
+  head:"A geologist who could not stop collecting rocks.",
+  cause:"A solar flare hit while the crew was working outside the shelter.",
+  logs:[["Day 3.","Priya found a crater full of glittering glass beads two kilometres away. She is a different person on a field site: singing and sketching and talking to the rocks."],["Day 4, morning.","The radiation badge beeped twice. A flare warning from Earth came in, but we were at the far crater and it was a long walk back."],["Night 4.","We started back too late. Priya's last note on her pad reads: 'Samples are in the red case. Get them home.' We did not make it to the shelter in time. Please stay close to shelter when the sky turns active."]],
+  real:["Solar storm, August 1972","A huge solar flare erupted between the Apollo 16 and Apollo 17 missions. Astronauts on the Moon during one would have needed shelter fast. Space weather forecasts matter."]},
+ {n:4,name:"Hullbreak",night:3,ev:"meteor",crew:["Cmdr Diego Santos","Eng. Kira Volkov","Dr. Leah Brooks"],
+  head:"The repair kit was in the wrong room.",
+  cause:"A micrometeorite punched through the wall while the crew slept.",
+  logs:[["Day 2.","Kira put the patch kit in the storage module because it keeps the sleeping area tidy. Leah joked that we would never need it."],["Night 3, 3 a.m.","A hiss. A tiny hole in the wall of the sleeping area, no wider than a coin. The pressure is falling. The patch kit is in the other module and the door between us has jammed."],["Night 3.","Kira says the micrometeoroid hit at tens of kilometres per second. There is no air on the Moon to slow them down. Leave patch kits where you sleep. Put regolith on the roof. Tell the next crew."]],
+  real:["Soyuz leak, 2018","A tiny hole in a Soyuz spacecraft docked to the ISS was found and patched in orbit. Crews keep repair tools close and practise fast fixes."]},
+ {n:5,name:"Frostline",night:6,ev:"cold",crew:["Cmdr Hana Sato","Tech. Ben Carter"],
+  head:"They survived the day. The night was longer than their power.",
+  cause:"The heaters failed during the coldest hours of the lunar night.",
+  logs:[["Day 14.","The Sun dropped below the horizon today. We took photos of the last light on the ridge. Ben says the night is two weeks long, and our batteries have been doing fine."],["Night 6.","Frost is growing on the inside of the windows. The battery bank dropped faster than we calculated. Outside is -173 degrees. We are huddled in one room with the last heater."],["Night 6, late.","We should have built a nuclear power unit or stored more energy. The Sun is a long way off. Keep the heaters running first, and keep spare batteries charged before the dark."]],
+  real:["Lunar nights","A lunar night lasts about two weeks and the surface drops to around -173 °C. NASA's Kilopower fission design is meant to provide steady power through it, with no sunlight needed."]},
+ {n:6,name:"Quiet Hall",night:5,ev:"homesick",crew:["Cmdr Omar Haddad","Dr. Elena Rossi","Tech. Yuki Tanaka"],
+  head:"The air and power were fine. They simply stopped talking.",
+  cause:"Supplies ran thin and the crew lost hope. Exhaustion led to fatal mistakes.",
+  logs:[["Day 3.","Food is ordinary, power is fine. Yuki stopped joining dinner. Elena skipped her radio call to her kids. I let it slide."],["Day 5.","Nobody exercises now. We sit in the quiet hall and look at Earth through the window. It looks so small and so far away. Nobody wants to say it out loud."],["Night 5.","I made a mistake with a valve today because I was tired and not paying attention. It was a small one, but small mistakes add up out here. Talk to each other. Call home. Take care of your mind first."]],
+  real:["ISS long-duration crews","NASA studies how isolation affects astronauts. Family calls, exercise, hobbies and good sleep are scheduled on purpose because a tired or lonely crew makes mistakes."]}
+];
+const LOST=STORIES.map(s=>({n:s.n,night:s.night,cause:s.cause,ev:s.ev}));
+const LOSTEV={co2:1,dust:2,flare:3,meteor:4,cold:5,homesick:6,recycler:6};
+
+function storyHTML(st){return `<p class="small muted">Crew: ${st.crew.map(esc).join(" · ")} · lost on night ${st.night}</p>${st.logs.map(l=>`<p class="small"><b>${esc(l[0])}</b> ${esc(l[1])}</p>`).join("")}<div class="debrief"><b>${esc(st.real[0])}</b><br>${esc(st.real[1])}</div>`}
+
+function storiesFound(){return STORIES.filter(st=>S.poi["poi_wreck"+st.n]).length}
+
+/* ============ EVENT TYPES ============ */
+const ETYPE={rad:["☢️","Radiation"],tech:["🔧","Technical failure"],med:["🩺","Medical"],env:["🌑","Environment"],supply:["📦","Supply"],psych:["🧠","Crew"]};
+const TYPEOF={flare:"rad",dust:"env",meteor:"env",co2:"tech",cold:"tech",quake:"env",comms:"tech",recycler:"tech",blight:"supply",airlock:"env",short:"tech",homesick:"psych",static:"env",helmet:"tech",alarm:"tech",resupply:"supply",thermal:"env",frozen:"tech",shower:"env",lro:"supply"};
+const NIGHTONLY=["cold","homesick","frozen","shower"];
+const EVAIDS=["helmet","static","badge","fall"];
+EV.push(
+ {id:"spe",type:"rad",icon:"☀️",title:"Solar particle event",text:"NASA space weather forecasters report a big flare. Fast protons from the Sun will reach the Moon within the hour. There is no air or magnetic field to stop them.",prot:true,
+  opts:[{l:"Shelter in the storm cellar until it passes",ctx:"Behind regolith and water walls you take a small dose. You lose time and some mood.",fx:{rad:6,morale:-6,e:2}},{l:"Finish your work first, then shelter",ctx:"Risky. A big storm can deliver a large dose in just a few hours.",fx:{rad:45,health:-8}},{l:"Ignore the alert",ctx:"The dose may be very high. This is how astronauts get radiation sickness.",fx:{rad:110,health:-20}}],
+  real:["NASA space weather","Solar particle events can raise the dose quickly. Apollo-era planners worried about the August 1972 storm. Artemis crews are trained to shelter, and thick regolith or water walls cut the dose."]},
+ {id:"gcr",type:"rad",icon:"🌌",title:"Cosmic ray surge",text:"The Sun is quiet, and a quiet Sun lets more galactic cosmic rays through. Your dosimeter climbs steadily.",prot:true,
+  opts:[{l:"Sleep behind the water tanks",ctx:"Water makes a decent shield but you lose some for drinking.",fx:{rad:4,water:-5,morale:-2}},{l:"Carry on as usual",ctx:"A small extra dose, no cost.",fx:{rad:14}}],
+  real:["Galactic cosmic rays","Cosmic ray levels are highest when solar activity is low. They are hard to shield against, so crews limit total exposure over time."]},
+ {id:"badge",type:"rad",icon:"📟",title:"Dosimeter alarm outside",text:"Your radiation badge chirps during an outside task. The dose rate has jumped.",prot:false,
+  opts:[{l:"Return inside now",ctx:"Costs tomorrow's time but protects you.",fx:{rad:3,e:1}},{l:"Finish the sample first",ctx:"You get the job done but pay in dose.",fx:{rad:18,health:-4}}],
+  real:["Astronaut dosimeters","Crews wear dosimeters and mission controllers track the dose for each person against NASA's limits."]},
+ {id:"fall",type:"med",icon:"🪨",title:"A fall on the slope",text:"The slope is loose and your boot slides. You tumble in the dust. Low gravity makes it feel slow, but the suit is still stiff.",prot:false,
+  opts:[{l:"Get up carefully and check the suit",ctx:"Takes a few minutes but safe.",fx:{e:1,health:-3}},{l:"Hurry on",ctx:"The suit might have a small tear.",fx:{health:-10,o2:-4}}],
+  real:["Apollo moonwalks","Apollo astronauts fell several times on the surface, including on Apollo 17, because the suits are bulky and the dust is slippery."]},
+ {id:"sick",type:"med",icon:"🤒",title:"Feverish and dizzy",text:"You wake up with a fever. Your head spins, and the medical checklist says to stop and call Earth.",prot:false,
+  opts:[{l:"Call the flight surgeon and rest",ctx:"Safe, but you lose time.",fx:{health:-4,e:2,morale:2}},{l:"Push through",ctx:"You keep working while sick.",fx:{health:-18}}],
+  real:["Flight surgeons","NASA flight surgeons support astronauts from the ground, and crews carry medical kits and train in first aid."]},
+ {id:"bone",type:"med",icon:"🦴",title:"Bone loss warning",text:"Your health check shows weak bones. In low gravity bones thin quickly unless you exercise.",prot:false,
+  opts:[{l:"Add extra exercise",ctx:"Two hours on the treadmill.",fx:{health:4,e:2,power:-3}},{l:"Skip it today",ctx:"You save time but weaken.",fx:{health:-8}}],
+  real:["Bone density in space","Astronauts in orbit can lose about 1% of bone density a month without countermeasures, so exercise is scheduled every day."]},
+ {id:"fire",type:"tech",icon:"🔥",title:"A small fire",text:"Smoke fills a corner of the habitat. A cartridge in an oxygen generator is burning.",prot:false,
+  opts:[{l:"Use the extinguisher and ventilate",ctx:"The fire is out but you lose air.",fx:{o2:-10,power:-4}},{l:"Seal the module and wait",ctx:"Smoke spreads. Air burns off.",fx:{o2:-20,health:-10}}],
+  real:["Mir space station, 1997","A fire in an oxygen candle on Mir filled the station with smoke. Fire safety training is a core part of astronaut preparation."]},
+ {id:"ammonia",type:"tech",icon:"⚠️",title:"Toxic leak alarm",text:"A coolant leak alarm rings. Ammonia can be toxic, and the cooling loop pressure is falling.",prot:false,
+  opts:[{l:"Put on masks and isolate the section",ctx:"Safe procedure, a stressful hour.",fx:{morale:-4,e:1}},{l:"Check the source first",ctx:"Faster, but you breathe whatever is in the air.",fx:{health:-12,o2:-4}}],
+  real:["ISS ammonia alarm, 2015","In January 2015 an ISS cooling alarm sent astronauts to the Russian segment while controllers checked for a leak."]},
+ {id:"jam",type:"tech",icon:"🚪",title:"Airlock jam",text:"The outer airlock door will not seal. You cannot go outside until it is fixed.",prot:false,
+  opts:[{l:"Work the manual release",ctx:"A slow, tiring job.",fx:{e:2,health:-2}},{l:"Cycle the airlock again",ctx:"It burns air and power.",fx:{power:-10,o2:-6}}],
+  real:["Airlock safety","Airlocks have manual overrides because a stuck door would trap crews inside or outside."]},
+ {id:"antenna",type:"tech",icon:"📡",title:"Antenna failure",text:"The main antenna loses its lock on Earth. Mission Control goes silent.",prot:false,
+  opts:[{l:"Realign it by hand outside",ctx:"A short walk and a small dose.",fx:{e:1,o2:-4,rad:2}},{l:"Use the backup low-gain antenna",ctx:"Slower link. Mood sinks.",fx:{morale:-6,power:-3}}],
+  real:["Deep Space Network","NASA's Deep Space Network of big dishes keeps contact with spacecraft. Backup antennas keep a thin link when the main one fails."]},
+ {id:"slip",type:"supply",icon:"🚀",title:"Cargo lander delayed",text:"A cargo lander is delayed by a day. Everything ordered will arrive late.",prot:false,
+  opts:[{l:"Reorganize supplies and wait",ctx:"Costs a little food and time.",fx:{delay:1,food:-6,e:1}},{l:"Complain to Mission Control",ctx:"It does not help. Mood drops.",fx:{delay:1,morale:-4}}],
+  real:["Launch delays","Cargo flights to the ISS and Moon slip for weather, technical checks and orbital timing. Crews carry reserves for this."]},
+ {id:"bus",type:"tech",icon:"🔌",title:"Power bus overload",text:"A breaker trips and lights flicker. Too many machines are drawing power at once.",prot:false,
+  opts:[{l:"Shed non-critical loads",ctx:"Fewer lights and gadgets. Mood dips.",fx:{power:-6,morale:-4}},{l:"Run everything",ctx:"Burns a lot of stored power.",fx:{power:-18}}],
+  real:["Power management","Space stations constantly manage power loads. Critical systems like life support always come first."]},
+ {id:"calm",type:"env",icon:"🌤️",title:"Quiet space weather",text:"NASA's space weather forecast shows a calm week ahead. You have a rare breather.",prot:false,
+  opts:[{l:"Use the calm to rest",ctx:"Good for body and mind.",fx:{health:6,morale:4}},{l:"Spend extra time outside",ctx:"Fun, with a small dose.",fx:{morale:6,rad:2,o2:-3}}],
+  real:["Space weather","Forecasters watch the Sun for flares and storms so crews can plan outside work during calm periods."]}
+);
+EV.forEach(e=>{if(!e.type)e.type=TYPEOF[e.id]||"env"});
+function pickEvent(when){
+  const ok=e=>!EVAIDS.includes(e.id)&&(when==="morning"?!NIGHTONLY.includes(e.id):true);
+  let pool=EV.filter(e=>ok(e)&&!S.seen.includes(e.id));if(!pool.length){S.seen=[];pool=EV.filter(ok)}
+  let list=pool;
+  if((S.day-S.lastRad>=5||REALSUN.big)&&rnd()<.35){const r=pool.filter(e=>e.type==="rad");if(r.length)list=r}
+  else{list=[];pool.forEach(e=>{for(let i=0;i<(e.type==="rad"?2:1);i++)list.push(e)})}
+  const e=list[Math.floor(rnd()*list.length)];S.seen.push(e.id);if(e.type==="rad"){S.lastRad=S.day;S.alert=1}return e}
+function pickEva(){const l=EV.filter(e=>EVAIDS.includes(e.id));return l[Math.floor(rnd()*l.length)]}
+
+/* ============ BUILD: TYPE WHAT YOU WANT ============ */
+let BQ="",BC="",BP=null;
+function haveCount(k){return S.modules.filter(m=>m.t===k).length+S.projects.filter(p=>p.key===k).length}
+function matChips(){return `<div class="matrow">${Object.keys(MATK).map(k=>`<span class="hchip">${MATK[k][0]} ${MATK[k][1]}: <b>${MD().free?"∞":S.mat[k]}</b></span>`).join("")}</div>`}
+function buildBody(){
+  let h=`<p class="small muted">Everything is built from materials. A cargo lander brings new materials <b>every day</b>, and a big load every 3rd day. Building costs <b>hours</b> and <b>power</b>. Type what you want to build, choose a material, then work on it. Some modules need a set material and a set amount of time.</p>${matChips()}`;
+  h+=`<div class="row" style="margin:6px 0"><button class="sm" ${S.energy<2?"disabled":""} onclick="mineReg()">⛏️ Mine regolith (2h, ⚡ −4): +${6+Math.round(sumFx("m_reg"))} 🧱</button><button class="sm" onclick="orderMenu()">🚀 Request extra materials (SP)</button></div>`;
+  h+=`<input id="bq" class="bq" type="text" placeholder="Type what you want to build: greenhouse, reactor, dust, shelter…" oninput="bSearch(this.value)" autocomplete="off" aria-label="What do you want to build?"><div class="row" style="margin:6px 0">${Object.keys(CATN).map(c=>`<button class="sm ${BC===c?"primary":""}" onclick="bCat('${c}')">${CATN[c]}</button>`).join("")}</div><div id="bres"></div><div id="bplan"></div>`;
+  if(S.projects.length)h+=`<p><b>🔨 In progress</b></p>`+S.projects.map((p,i)=>{const M=MODK[p.key],done=p.total-p.left,pc=Math.round(done/p.total*100);return `<div class="card" style="margin:6px 0"><b>${M.icon} ${esc(M.n)}</b> <span class="small muted">${MAT[p.L].icon} ${MAT[p.L].n}${p.buried?" · buried":""}</span><div class="bar blue" style="margin:6px 0"><i style="width:${pc}%"></i></div><p class="small">${done}/${p.total} hours · ⚡ ${p.pwr} power per hour</p><div class="row"><button class="sm" ${S.energy<1?"disabled":""} onclick="workProject(${i},1)">Work 1h</button><button class="sm" ${S.energy<2?"disabled":""} onclick="workProject(${i},2)">Work 2h</button><button class="sm primary" ${S.energy<1?"disabled":""} onclick="workProject(${i},99)">Work as long as possible</button></div></div>`}).join("");
+  if(S.orders.length)h+=`<p><b>🚀 On the way</b></p>`+S.orders.map(o=>`<p class="small">${o.t[0]==="p"?MATK[o.t.slice(2)][0]+" "+esc(MATK[o.t.slice(2)][1])+" pack":"📦 "+esc(SUP[+o.t.slice(2)].n)} · arrives on day ${o.arrive}</p>`).join("");
+  h+=`<p><b>📦 Supplies from Mission Control</b></p>`+SUP.map((s,i)=>`<button class="opt" ${S.sp<s.cost&&!MD().free?"disabled":""} onclick="orderSupply(${i})">${esc(s.n)} <span class="tag">${MD().free?"free":s.cost+" SP"}</span><span class="ctx">${esc(s.ctx)} Arrives tomorrow.</span></button>`).join("");
+  const counts={};S.modules.forEach(m=>counts[m.t]=(counts[m.t]||0)+1);
+  h+=`<p><b>🏗️ Built (${S.modules.length})</b></p>`+(S.modules.length?`<p class="small">${Object.keys(counts).map(k=>MODK[k].icon+" "+esc(MODK[k].n)+(counts[k]>1?" ×"+counts[k]:"")).join(" · ")}</p>`:`<p class="small muted">Nothing yet. Type something above to start.</p>`);
+  return h}
+function bSearch(q){BQ=q;BC="";bRefresh()}
+function bCat(c){BC=BC===c?"":c;BQ="";bRefresh()}
+function bRefresh(){
+  const inp=$("#bq");if(inp&&inp.value!==BQ)inp.value=BQ;const r=$("#bres");if(!r)return;
+  const list=BC?Object.values(MODK).filter(m=>m.cat===BC):searchMods(BQ).slice(0,10);
+  r.innerHTML=!BQ&&!BC?`<p class="small muted">There are ${Object.keys(MODK).length} modules. Type a name or an idea, like “oxygen”, “dust” or “reactor”, or pick a category.</p>`:list.length?list.map(m=>`<button class="opt" onclick="bPick('${m.key}')">${m.icon} ${esc(m.n)} <span class="tag">${CATN[m.cat]}</span><span class="tag">${haveCount(m.key)}/${m.max}</span><span class="ctx">${esc(m.d)}</span></button>`).join(""):`<p class="small bad">Nothing matches “${esc(BQ)}”. Try another word.</p>`;
+  bPlanHTML()}
+function bPick(key){BP={key,L:MODK[key].allowed[0],buried:false};bPlanHTML();const e=$("#bplan");if(e)e.scrollIntoView({behavior:"smooth",block:"nearest"})}
+function bMat(L){if(BP){BP.L=L;bPlanHTML()}}
+function bBury(v){if(BP){BP.buried=!!v;bPlanHTML()}}
+function bPlanHTML(){
+  const el=$("#bplan");if(!el)return;if(!BP){el.innerHTML="";return}
+  const M=MODK[BP.key],free=MD().free;if(M.fixed)BP.buried=false;
+  const pl=planBuild(BP.key,BP.L,BP.buried),have=haveCount(BP.key);
+  const matBtns=M.fixed?`<p class="small">🔒 This module needs <b>${MAT[BP.L].icon} ${MAT[BP.L].n}</b> and a set build time of <b>${M.hours} hours</b>.</p>`:`<div class="grid">${M.allowed.map(L=>{const m=MAT[L],p=planBuild(BP.key,L,BP.buried),ok=free||S.mat[m.k]>=p.units;return `<button class="opt ${BP.L===L?"sel":""}" onclick="bMat('${L}')">${m.icon} ${m.n}<span class="ctx">${p.units} units · ${p.hrs}h · ⚡${p.pwr}/h · strength ${m.str} · shield ${m.shield} · insulation ${m.therm}${ok?"":" · <span class=bad>not enough</span>"}</span></button>`}).join("")}</div>`;
+  const needs=Object.keys(pl.needs).map(k=>{const ok=free||S.mat[k]>=pl.needs[k];return `<span class="${ok?"good":"bad"}">${MATK[k][0]} ${pl.needs[k]} ${MATK[k][1]} (have ${free?"∞":S.mat[k]})</span>`}).join(" · ");
+  const can=(free||Object.keys(pl.needs).every(k=>S.mat[k]>=pl.needs[k]))&&have<M.max;
+  el.innerHTML=`<div class="card" style="margin:8px 0;border-color:var(--accent)"><h3>${M.icon} ${esc(M.n)}</h3><p class="small">${esc(M.d)}</p><p class="small muted">${CATN[M.cat]} · you have ${have} of ${M.max} allowed</p>${matBtns}${M.fixed?"":`<label class="small"><input type="checkbox" ${BP.buried?"checked":""} onchange="bBury(this.checked)"> ⛏️ Bury it under regolith (+25% time, +0.5 shield for the base)</label>`}<p><b>⏱️ ${pl.hrs} hours</b> · <b>⚡ ${pl.pwr}</b> power per hour (${pl.total} in total)</p><p class="small">Materials: ${needs}</p><div class="row"><button class="primary" ${can?"":"disabled"} onclick="startProject()">🔨 Start building</button><button class="sm" onclick="BP=null;bPlanHTML()">Cancel</button></div>${have>=M.max?`<p class="small bad">You already have the maximum of this module.</p>`:""}</div>`}
+function startProject(){
+  if(!BP)return;const M=MODK[BP.key],free=MD().free,pl=planBuild(BP.key,BP.L,BP.buried);
+  if(haveCount(BP.key)>=M.max){toast("You already have the maximum of that module.");return}
+  if(!free){for(const k in pl.needs)if(S.mat[k]<pl.needs[k]){toast("Not enough "+MATK[k][1]+".");return}for(const k in pl.needs)S.mat[k]-=pl.needs[k]}
+  S.projects.push({key:BP.key,L:BP.L,total:pl.hrs,left:pl.hrs,pwr:pl.pwr,buried:BP.buried});
+  log("🔨 Started building "+M.n+" ("+MAT[BP.L].n+", "+pl.hrs+"h, ⚡"+pl.pwr+"/h)");toast("Materials set aside. Now spend hours working on it.");BP=null;save();render()}
+function workProject(i,h){
+  const p=S.projects[i];if(!p)return;h=Math.min(h,p.left,S.energy);if(h<1){toast("No hours left today.");return}
+  if(!MD().free&&p.pwr>0){const aff=Math.floor(S.res.power/p.pwr);if(aff<1){toast("Not enough power to work on this. Each hour costs "+p.pwr+" power.");return}h=Math.min(h,aff)}
+  S.energy-=h;if(!MD().free)S.res.power=clamp(S.res.power-p.pwr*h,0,capP());p.left-=h;log("🔨 Worked "+h+"h on "+MODK[p.key].n+" (⚡ −"+Math.round(p.pwr*h*10)/10+")");
+  if(p.left<=0){S.projects.splice(i,1);completeModule(p)}else toast("Progress: "+(p.total-p.left)+"/"+p.total+" hours.");
+  save();render()}
+function completeModule(p){const M=MODK[p.key];S.modules.push({t:p.key,mat:p.L,buried:!!p.buried});if(p.buried)S.buried++;if(M.fx.armor)S.armor=Math.min(3,S.armor+M.fx.armor);log("🏗️ Built "+M.n+" ("+MAT[p.L].n+")");toast(M.icon+" "+M.n+" is finished! "+M.d)}
+function mineReg(){if(S.energy<2){toast("Not enough hours left today.");return}if(!MD().free&&S.res.power<4){toast("Not enough power.");return}S.energy-=2;if(!MD().free)S.res.power=clamp(S.res.power-4);S.res.o2=clamp(S.res.o2-2);const n=6+Math.round(sumFx("m_reg"));S.mat.reg+=n;applyFx({rad:.2},0);log("⛏️ Mined "+n+" regolith bricks");toast("⛏️ +"+n+" regolith bricks");save();render()}
+function orderMenu(){openModal(`<b>🚀 Request extra materials</b><p class="small muted">A pack of 6 units costs 6 Science Points and arrives tomorrow.</p>`+Object.keys(MATK).map(k=>`<button class="opt" ${S.sp<6&&!MD().free?"disabled":""} onclick="orderPack('${k}')">${MATK[k][0]} ${MATK[k][1]} <span class="tag">${MD().free?"free":"6 SP"}</span></button>`).join(""),true)}
+function orderPack(k){const free=MD().free;if(!free&&S.sp<6)return;if(!free)S.sp-=6;S.orders.push({t:"p:"+k,arrive:S.day+1});log("🚀 Requested "+MATK[k][1]+". Arrives day "+(S.day+1));toast("Requested. A cargo lander will bring 6 "+MATK[k][1]+" tomorrow.");closeModal();save();render()}
+function orderSupply(i){const s=SUP[i],free=MD().free;if(!free&&S.sp<s.cost)return;if(!free)S.sp-=s.cost;S.orders.push({t:"s:"+i,arrive:S.day+1});log("📦 Ordered "+s.n+". Arrives tomorrow.");toast("Ordered. Arrives tomorrow.");save();render()}
+const CARGO={alu:[3,6],steel:[2,5],honey:[2,4],carbon:[2,3],ti:[1,3],reg:[3,6],kap:[2,3],elec:[4,7]};
+function cargoDrop(){
+  const drops=1+Math.floor(sumFx("cargo")),out=[];
+  for(let d=0;d<drops;d++){const keys=Object.keys(CARGO).sort(()=>rnd()-.5).slice(0,3);keys.forEach(k=>{const a=CARGO[k],n=a[0]+Math.floor(rnd()*(a[1]-a[0]+1));S.mat[k]+=n;out.push(MATK[k][0]+n)})}
+  if(S.day%3===0){["alu","steel","honey","reg"].forEach(k=>{S.mat[k]+=4;out.push(MATK[k][0]+"4")});["ti","carbon","kap"].forEach(k=>{S.mat[k]+=2;out.push(MATK[k][0]+"2")});S.mat.elec+=4;out.push(MATK.elec[0]+"4")}
+  if(out.length){log("🚀 Cargo lander: "+out.join(" "));return out.join(" ")}return ""}
+
+/* ============ CHARTS ============ */
+const VC={o2:"#3987e5",water:"#d95926",food:"#199e70",power:"#c98500",health:"#d55181",morale:"#0ca30c",rad:"#3987e5",sp:"#3987e5"};
+const CREG={};
+function recordHist(){S.hist=S.hist.filter(h=>h.d!==S.day);S.hist.push({d:S.day,o2:S.res.o2,water:S.res.water,food:S.res.food,power:S.res.power,health:S.res.health,morale:S.res.morale,rad:Math.round(S.rad*10)/10,sp:S.sp});S.hist=S.hist.slice(-40)}
+function lineChart(id,title,series,o){
+  o=o||{};const W=600,H=230,L=40,R=92,T=14,B=30,pw=W-L-R,ph=H-T-B,hist=S.hist;
+  if(hist.length<2)return `<div class="chartbox"><h4>${esc(title)}</h4><p class="small muted">This chart appears once you have two days of data.</p></div>`;
+  const x0=hist[0].d,x1=Math.max(hist[hist.length-1].d,x0+1),ymax=o.max||Math.max(100,...series.flatMap(s=>hist.map(h=>h[s.k]))),X=d=>L+(d-x0)/(x1-x0)*pw,Y=v=>T+ph-(Math.min(v,ymax)/ymax)*ph;
+  CREG[id]={W,L,pw,x0,x1,series,hist,X};
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}" class="chart"><rect x="0" y="0" width="${W}" height="${H}" fill="var(--surf)" rx="8"/>`;
+  for(let i=0;i<=4;i++){const v=ymax*i/4,y=Y(v);g+=`<line x1="${L}" x2="${L+pw}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted2)">${Math.round(v)}</text>`}
+  const step=Math.max(1,Math.ceil((x1-x0)/8));for(let d=x0;d<=x1;d+=step)g+=`<text x="${X(d)}" y="${H-10}" text-anchor="middle" font-size="11" fill="var(--muted2)">${d}</text>`;
+  g+=`<text x="${L+pw/2}" y="${H-1}" text-anchor="middle" font-size="10" fill="var(--muted2)">Day</text>`;
+  (o.refs||[]).forEach(r=>{const y=Y(r.v);g+=`<line x1="${L}" x2="${L+pw}" y1="${y}" y2="${y}" stroke="var(--ref)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${L+pw+4}" y="${y+4}" font-size="11" fill="var(--ink2)">${esc(r.label)}</text>`});
+  const ends=[];
+  series.forEach(s=>{const pts=hist.map(h=>[X(h.d),Y(h[s.k])]);g+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;const e=pts[pts.length-1];g+=`<circle cx="${e[0]}" cy="${e[1]}" r="4" fill="${s.c}" stroke="var(--surf)" stroke-width="2"/>`;ends.push({y:e[1],s})});
+  ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<13)ends[i].y=ends[i-1].y+13;
+  if(!o.refs||series.length<=4)ends.forEach(e=>{g+=`<text x="${L+pw+8}" y="${e.y+4}" font-size="11.5" fill="var(--ink)">${esc(e.s.n)}</text>`});
+  g+=`<line class="xh" x1="0" x2="0" y1="${T}" y2="${T+ph}" stroke="var(--ink2)" stroke-width="1" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" onmousemove="chHover(event,'${id}')" ontouchmove="chHover(event.touches[0],'${id}')" onmouseleave="chOut('${id}')"/></svg>`;
+  const legend=`<div class="legend">${series.map(s=>`<span><i style="background:${s.c}"></i>${esc(s.n)}</span>`).join("")}</div>`;
+  const table=`<details><summary class="small">Show as a table</summary><div style="overflow:auto"><table><tr><th>Day</th>${series.map(s=>`<th>${esc(s.n)}</th>`).join("")}</tr>${hist.map(h=>`<tr><td>${h.d}</td>${series.map(s=>`<td>${Math.round(h[s.k]*10)/10}</td>`).join("")}</tr>`).join("")}</table></div></details>`;
+  return `<div class="chartbox" id="cb_${id}"><h4>${esc(title)}</h4>${g}<div class="tipbox" id="tip_${id}" hidden></div>${legend}${table}</div>`}
+function chHover(e,id){
+  const c=CREG[id],box=document.getElementById("cb_"+id);if(!c||!box)return;const svg=box.querySelector("svg"),r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*c.W;
+  let best=c.hist[0],bd=1e9;c.hist.forEach(h=>{const d=Math.abs(c.X(h.d)-px);if(d<bd){bd=d;best=h}});
+  const xh=svg.querySelector(".xh");xh.setAttribute("x1",c.X(best.d));xh.setAttribute("x2",c.X(best.d));xh.setAttribute("visibility","visible");
+  const tb=document.getElementById("tip_"+id);tb.hidden=false;tb.innerHTML=`<b>Day ${best.d}</b>`+c.series.map(s=>`<div><i style="background:${s.c}"></i>${esc(s.n)}: <b>${Math.round(best[s.k]*10)/10}</b></div>`).join("");
+  const left=Math.min(r.width-150,Math.max(0,c.X(best.d)/c.W*r.width+10));tb.style.left=left+"px";tb.style.top="40px"}
+function chOut(id){const box=document.getElementById("cb_"+id);if(!box)return;const x=box.querySelector(".xh");if(x)x.setAttribute("visibility","hidden");const t=document.getElementById("tip_"+id);if(t)t.hidden=true}
+function barChart(title,items,o){
+  o=o||{};const mx=o.max||Math.max(1,...items.map(i=>i.v));
+  return `<div class="chartbox"><h4>${esc(title)}</h4>${items.map(i=>`<div class="hbar" title="${esc(i.l)}: ${i.t||i.v}"><span class="hl">${esc(i.l)}</span><span class="ht"><i style="width:${Math.max(0,Math.min(100,i.v/mx*100))}%"></i></span><span class="hv">${esc(i.t||String(i.v))}</span></div>`).join("")}<details><summary class="small">Show as a table</summary><table>${items.map(i=>`<tr><td>${esc(i.l)}</td><td>${esc(i.t||String(i.v))}</td></tr>`).join("")}</table></details></div>`}
+function dataBody(){
+  const cap=capP(),dark=isDark(S.day),gen=dark?0:Math.round(DAY.gen*(1-S.dust/100)),dr=MD().dr;
+  let modP=0;S.modules.forEach(m=>{const f=MODK[m.t].fx;if(f.power)modP+=f.power;if(f.spower&&!dark)modP+=f.spower});
+  const cats={};S.modules.forEach(m=>{const c=CATN[MODK[m.t].cat];cats[c]=(cats[c]||0)+1});
+  const life=[{k:"o2",n:"Oxygen",c:VC.o2},{k:"water",n:"Water",c:VC.water},{k:"food",n:"Food",c:VC.food}],crew=[{k:"power",n:"Power",c:VC.power},{k:"health",n:"Health",c:VC.health},{k:"morale",n:"Morale",c:VC.morale}];
+  return liveHTML()+`<p class="small muted">The charts below update every morning. Hover or tap a chart to read values. Every chart has a table view.</p>`+
+  barChart("Meters right now (percent of full)",RES.map(r=>({l:r[1]+" "+r[2],v:S.res[r[0]]/(r[0]==="power"?cap:100)*100,t:Math.round(S.res[r[0]])+(r[0]==="power"?" / "+cap:" / 100")+(S.res[r[0]]<25?" ⚠️ low":"")})).concat([{l:"☢️ Radiation dose",v:S.rad/RADMAX*100,t:S.rad.toFixed(1)+" / "+RADMAX+" mSv"+(S.rad>=120?" ⚠️ sickness range":"")}]),{max:100})+
+  lineChart("o2","Oxygen by day",[life[0]],{max:100})+
+  lineChart("water","Water by day",[life[1]],{max:100})+
+  lineChart("food","Food by day",[life[2]],{max:100})+
+  lineChart("crew","Power, health and morale by day",crew,{max:Math.max(100,cap)})+
+  lineChart("rad","Radiation dose this month (mSv)",[{k:"rad",n:"Dose",c:VC.rad}],{max:RADMAX,refs:[{v:120,label:"Sickness"},{v:RADMAX,label:"Limit"}]})+
+  lineChart("sp","Science Points by day",[{k:"sp",n:"SP",c:VC.sp}],{max:Math.max(50,...S.hist.map(h=>h.sp))})+
+  barChart("Materials in stock (units)",Object.keys(MATK).map(k=>({l:MATK[k][0]+" "+MATK[k][1],v:MD().free?99:S.mat[k],t:MD().free?"∞":String(S.mat[k])})),{max:Math.max(12,...Object.values(S.mat))})+
+  barChart("Power budget today",[{l:"☀️ Solar panels",v:gen,t:"+"+gen},{l:"🏗️ Modules",v:modP,t:(modP>=0?"+":"")+modP},{l:"🏠 Base use (day)",v:Math.round(DAY.use*dr),t:"−"+Math.round(DAY.use*dr)},{l:"🔥 Heaters tonight",v:Math.round(NIGHT.power*dr*(1-Math.min(.3,sumMat("therm")*.006))),t:"−"+Math.round(NIGHT.power*dr*(1-Math.min(.3,sumMat("therm")*.006)))}],{max:Math.max(60,gen+modP)})+
+  barChart("Modules built by type",Object.keys(CATN).map(c=>({l:CATN[c],v:cats[CATN[c]]||0,t:String(cats[CATN[c]]||0)})),{max:Math.max(3,...Object.values(cats),0)})+
+  barChart("Shielding and strength",[{l:"🛡️ Radiation shield (of 3)",v:armorEff(),t:armorEff().toFixed(1)+" / 3"},{l:"🧱 Strength (event damage −)",v:Math.min(.2,sumMat("str")*.0015)*100,t:"−"+Math.round(Math.min(.2,sumMat("str")*.0015)*100)+"%"},{l:"🔥 Insulation (heater use −)",v:Math.min(.3,sumMat("therm")*.006)*100,t:"−"+Math.round(Math.min(.3,sumMat("therm")*.006)*100)+"%"}],{max:Math.max(3,armorEff())})}
+/* ============ MANUAL ============ */
+let MBACK="home";
+function openManual(){if(V!=="manual")MBACK=V;go("manual")}
+function closeManual(){go(MBACK&&MBACK!=="manual"?MBACK:"home")}
+function renderManual(){
+  const sec=(t,b,open)=>`<details class="msec" ${open?"open":""}><summary><b>${t}</b></summary><div class="small">${b}</div></details>`;
+  const matRows=Object.keys(MAT).map(l=>{const m=MAT[l];return `<tr><td>${m.icon} ${m.n}</td><td>×${m.units}</td><td>×${m.time}</td><td>×${m.power}</td><td>${m.str}</td><td>${m.shield}</td><td>${m.therm}</td></tr>`}).join("");
+  const modeRows=Object.keys(MODES).map(k=>{const m=MODES[k];return `<tr><td>${m.icon} ${m.n}</td><td>${m.en}h</td><td>${Math.round(m.prob*100)}%</td><td>×${m.dr}</td><td>×${m.radm}</td><td>${m.samp}</td></tr>`}).join("");
+  return `<div class="card"><div class="row spread"><h2>📖 How to play: full manual</h2><button onclick="closeManual()">← Back</button></div><p class="muted small">Everything you need to survive. Tap a section to open it. This manual is about the game. Astronaut training (real NASA training) is a separate course.</p>
+  ${sec("1. Your mission",`<p>Survive <b>${NIGHTS} days</b> at Outpost, the seventh lunar outpost. Six crews before you were lost. To <b>win</b> you must survive all ${NIGHTS} days, collect the required number of rock samples (4 to 6 by mode, 1 in Free Play) and load them into the return capsule.</p><p>You <b>lose</b> if oxygen reaches 0, health reaches 0 or your radiation dose reaches ${RADMAX} mSv. (Free Play cannot be lost.)</p>`,true)}
+  ${sec("2. How a day works",`<p>Each morning you have a number of <b>hours</b> (11 to 18 by mode). Almost everything uses hours: <b>Maintain</b> jobs, <b>Science</b> tasks, <b>Explore</b> trips, <b>Build</b> work and <b>Mission</b> tasks. Hours do not carry over.</p><p>Often a <b>major problem</b> strikes in the morning (a choice with trade-offs). When you press <b>End the day</b>, the day's supplies are used, daily module effects happen, and a <b>night event</b> strikes. Then you read the night report and start the next day. Trips outside can also cause an <b>EVA incident</b>.</p>`)}
+  ${sec("3. The seven meters",`<p>🫧 <b>Oxygen</b>, 💧 <b>water</b>, 🍲 <b>food</b>, ⚡ <b>power</b>, ❤️ <b>health</b>, 🙂 <b>morale</b> and ☢️ <b>radiation</b>. Each full day uses oxygen, water and food. Power is made by panels and modules and used by the base and heaters.</p><ul><li>Oxygen at 0 ends the mission.</li><li>No water: health −25 each night. No food: health −15.</li><li>Power below 0 at night: the heaters stop and health −30.</li><li>Morale at 0: health −10. Morale below 25: 2 fewer hours the next day.</li></ul><p>Fix them with the <b>Maintain</b> tab (scrubbers, recycling, meals, exercise, calls home) and with modules.</p>`)}
+  ${sec("4. Lunar days and nights, and power",`<p>A real lunar day lasts about 29.5 Earth days (NASA). In this game <b>days 1 to 15 are sunlit</b> and <b>days 16 to ${NIGHTS} are dark</b>. Solar panels make power only when it is sunlit, and dust covers them (+18% a day, so brush them). During the dark days outside is about −173 °C and you need power that does not depend on sunlight, such as a <b>Kilopower reactor</b>, batteries and fuel cells. Power storage is capped at 100 (more with fuel cells and batteries).</p>`)}
+  ${sec("5. Radiation",`<p>The Moon has no atmosphere or magnetic field, so radiation reaches the surface. You get about <b>1.4 mSv a day</b> (NASA-era surface measurements) multiplied by the mode setting and reduced by your shielding. Trips outside add a bit more. <b>Solar particle events</b> can add 45 to 110 mSv if you ignore them. <b>Cosmic ray surges</b> add a smaller dose.</p><p>At <b>120 mSv</b> you get radiation sickness (health loss each night). At <b>${RADMAX} mSv</b> the mission ends. (NASA's career limit for astronauts is 600 mSv.)</p><p>Reduce the dose with <b>shielding</b>: radiation shelters, water walls, regolith berms and burying modules under regolith (+0.5 shield each). Thick materials help too: regolith bricks (shield 4) and steel (shield 3) beat carbon fiber (0). Flare alarms and radiation monitors warn you early and cut the dose of storm events.</p>`)}
+  ${sec("6. Materials and building",`<ol><li>Open the <b>Build</b> tab and <b>type what you want to build</b> (for example “greenhouse”, “oxygen” or “dust”). There are ${Object.keys(MODK).length} modules. You can also pick a category.</li><li>Choose a <b>structure material</b>. Materials change the build <b>time</b>, <b>power</b> and number of <b>units</b> needed, and give your base <b>strength</b>, <b>shield</b> and <b>insulation</b>.</li><li>Press <b>Start building</b>. The materials are set aside right away.</li><li>Spend hours on the project in the same tab. <b>Each hour costs power.</b> When the last hour is done, the module is finished.</li></ol><p>Some modules have a <b>set material and set time</b> (for example the Kilopower reactor needs titanium and 8 hours, and radiation shelters need regolith). Those cannot be changed.</p><table><tr><th>Material</th><th>Units</th><th>Time</th><th>Power</th><th>Strength</th><th>Shield</th><th>Insulation</th></tr>${matRows}</table><p>Strength lowers event damage (up to −20%). Insulation lowers heater use (up to −30%). Shield lowers radiation.</p><p><b>Cargo landers</b> bring new materials <b>every day</b>, with a big load every 3rd day. You can also <b>mine regolith</b> yourself, request extra material packs for 6 Science Points, and build mining and manufacturing modules that make materials every day.</p>`)}
+  ${sec("7. Exploring and rock samples",`<p>The <b>Explore</b> tab lists places to go. A trip costs <b>hours</b> (round trip plus the task), <b>suit oxygen</b> and a small <b>radiation dose</b>, and there is a chance of an <b>EVA incident</b>. A Lunar Terrain Vehicle garage halves the costs.</p><p>There are 8 rock types (regolith, anorthosite, mare basalt, titanium basalt, breccia, orange volcanic glass, KREEP rock and polar ice). Each comes from a different place and teaches a real NASA fact. Back at base, <b>load samples into the return capsule</b> in the Mission tab. You can also search the wrecks of Outposts 1 to 6 to read their last logs, and explore a lava tube.</p>`)}
+  ${sec("8. Events and choices",`<p>Every event is a choice and <b>every option costs something</b>. Events come in types: ☢️ radiation, 🔧 technical, 🩺 medical, 🌑 environment, 📦 supply and 🧠 crew. After you choose, you learn the real NASA mission or fact behind it. Modules and shielding make events hurt less.</p>`)}
+  ${sec("9. Science Points",`<p>Earn Science Points (SP) from science tasks, samples, wrecks, quizzes and Mission Control's +5 SP grant every day. Spend them on supplies and extra material packs. Some modules also make SP every day.</p>`)}
+  ${sec("10. Reading the data charts",`<p>The <b>Data</b> tab shows how much of everything you have: bars for meters, materials, power budget and modules, and line charts for oxygen, water, food, power, health, morale, radiation and Science Points over the days. Hover or tap a chart to read exact values. Every chart has a table view.</p><p>Watch the <b>radiation chart</b> against the dashed lines for sickness (120 mSv) and the limit (${RADMAX} mSv), and the <b>power budget</b> before the dark days begin.</p>`)}
+  ${sec("11. Game modes",`<table><tr><th>Mode</th><th>Hours/day</th><th>Morning problem chance</th><th>Supply drain</th><th>Radiation</th><th>Samples needed</th></tr>${modeRows}</table>`)}
+  ${sec("12. A good first three days",`<ol><li>Day 1: fix any low meter, brush the solar panels, then <b>build something small</b> that makes power or air.</li><li>Day 2: explore the nearby field site for your first sample, and read the Base tab.</li><li>Day 3: build a <b>radiation shelter</b> (regolith). Check the Data tab. Keep 2 to 3 hours free for problems.</li><li>Before day 16: build a <b>Kilopower reactor</b> and batteries for the dark days.</li></ol>`)}
+  </div>`}
+/* ============ TRAINING ACADEMY ============ */
+
+/* ============ DRAMATIC OPENING (typewriter) ============ */
+const DRAMA=[
+ "Astronaut, you are our only hope.",
+ "Space Mission, our company, has attempted infinite times but hasn't succeeded in making a lunar or martian outpost.",
+ "Our budget is low, and this is our last chance.",
+ "We need you."
+];
+let DR=null;
+function renderDrama(){
+  return `<div class="home-wrap drama-wrap"><svg class="home-stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${starsSVG(160,1000,1500,41)}${starsSVG(80,1000,1500,67)}</svg>
+  <button class="sm dskip" onclick="skipDrama()">Skip ▸▸</button>
+  <div id="dramatext" class="dramatext" aria-live="polite"></div>
+  <div id="dramabtn" class="dramabtn" hidden><button class="hbtn primary" onclick="go('modes')">Accept the mission →</button></div></div>`}
+function startDrama(){
+  stopDrama();const el=$("#dramatext");if(!el)return;
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  DR={li:0,ci:0,timer:null,done:false};
+  el.innerHTML=DRAMA.map((_,i)=>`<p class="dline" id="dl${i}"></p>`).join("");
+  const step=()=>{
+    if(!DR)return;const line=DRAMA[DR.li];
+    if(DR.ci<line.length){const p=$("#dl"+DR.li);if(p)p.innerHTML=esc(line.slice(0,DR.ci+1))+'<span class="caret"></span>';DR.ci++;const ch=line[DR.ci-1];DR.timer=setTimeout(step,reduce?4:/[.,]/.test(ch)?260:ch===" "?55:48)}
+    else{const p=$("#dl"+DR.li);if(p)p.innerHTML=esc(line);DR.li++;DR.ci=0;if(DR.li>=DRAMA.length)finishDrama();else DR.timer=setTimeout(step,reduce?10:750)}};
+  DR.timer=setTimeout(step,600)}
+function finishDrama(){if(!DR)return;DR.done=true;const last=$("#dl"+(DRAMA.length-1));if(last)last.innerHTML=esc(DRAMA[DRAMA.length-1])+'<span class="caret"></span>';const b=$("#dramabtn");if(b)b.hidden=false}
+function skipDrama(){if(!DR)return;clearTimeout(DR.timer);DRAMA.forEach((l,i)=>{const p=$("#dl"+i);if(p)p.innerHTML=esc(l)});DR.li=DRAMA.length;finishDrama()}
+function stopDrama(){if(DR){clearTimeout(DR.timer);DR=null}}
+
+/* ============ LIVE TELEMETRY + LIVE SPACE WEATHER ============ */
+const REALSUN={ok:false,big:false,cls:"",kp:null};
+let LIVE=null,NOAA=null;
+const LCOL=["#3987e5","#d95926","#199e70","#c98500","#d55181","#0ca30c"];
+const LCH=[
+ {id:"rad",n:"Radiation dose rate",u:"µSv/h",dec:0,t:()=>{const b=RADBASE*MD().radm*shieldF()*siteOf().radf*1000/24;return S.alert?b*(5+Math.random()*7):b},sd:t=>t*.035,span:t=>Math.max(t*.6,20)},
+ {id:"pow",n:"Power bus",u:"% of storage",dec:1,t:()=>S.res.power/capP()*100,sd:()=>.7,span:()=>8},
+ {id:"o2",n:"Cabin oxygen pressure",u:"kPa",dec:2,t:()=>21*(.72+.28*S.res.o2/100),sd:()=>.05,span:()=>.6},
+ {id:"hab",n:"Habitat temperature",u:"°C",dec:1,t:()=>21-(S.res.power<30?(30-S.res.power)*.15:0)-(isDark(S.day)?.4:0),sd:()=>.08,span:()=>1.2},
+ {id:"out",n:"Outside temperature",u:"°C",dec:1,t:()=>surfaceTemp(),sd:()=>isDark(S.day)?.6:1.5,span:()=>isDark(S.day)?4:25},
+ {id:"hr",n:"Crew heart rate",u:"bpm",dec:0,t:()=>62+(100-S.res.morale)*.1+(100-S.res.health)*.15+(S.alert?18:0),sd:()=>1.1,span:()=>14}
+];
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function liveHTML(){
+  return `<div class="chartbox"><div class="row spread"><h4><span class="livedot"></span> Live telemetry from Outpost 7</h4><button class="sm" id="livebtn" onclick="liveToggle()">⏸ Pause</button></div><p class="small muted">Sensor traces update several times a second. They are simulated from the state of your base: the dose rate climbs during a solar storm, power follows your batteries, cabin air follows your oxygen.</p><canvas id="livecv" class="livecv" aria-label="Live telemetry traces"></canvas><div id="livevals" class="small muted"></div></div>
+  <div class="chartbox"><h4>☀️ Live space weather from NOAA</h4><div id="noaa" class="small muted">Contacting NOAA Space Weather Prediction Center…</div><canvas id="noaacv" class="livecv" style="display:none" aria-label="GOES solar X-ray flux, last 6 hours"></canvas><div id="noaakp" class="small"></div></div>`}
+function startLive(){
+  stopLive();const cv=$("#livecv");if(!cv)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(300,cv.clientWidth||600),H=LCH.length*58+6;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+  LIVE={W,H,dpr,paused:false,n:150,hist:LCH.map(()=>[]),v:LCH.map(d=>d.t()),spike:LCH.map(()=>0)};
+  for(let k=0;k<LIVE.n;k++)liveStep();
+  LIVE.timer=setInterval(()=>{if(!LIVE.paused){liveStep();liveDraw()}},250);liveDraw();loadNoaa();LIVE.noaaT=setInterval(loadNoaa,60000)}
+function stopLive(){if(LIVE){clearInterval(LIVE.timer);clearInterval(LIVE.noaaT);LIVE=null}}
+function liveToggle(){if(!LIVE)return;LIVE.paused=!LIVE.paused;const b=$("#livebtn");if(b)b.textContent=LIVE.paused?"▶ Resume":"⏸ Pause"}
+function liveStep(){
+  LCH.forEach((d,i)=>{const tgt=d.t();let v=LIVE.v[i];v+=(tgt-v)*.18+gauss()*d.sd(tgt);if(Math.random()<.015)LIVE.spike[i]=(Math.random()<.5?-1:1)*d.sd(tgt)*(4+Math.random()*4);v+=LIVE.spike[i];LIVE.spike[i]*=.55;LIVE.v[i]=v;const h=LIVE.hist[i];h.push(v);if(h.length>LIVE.n)h.shift()})}
+function liveDraw(){
+  const cv=$("#livecv");if(!cv||!LIVE)return;const c=cv.getContext("2d"),{W,H,dpr}=LIVE;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+  c.fillStyle="#111a3d";c.fillRect(0,0,W,H);
+  const lx=150,rx=W-76,row=58;
+  LCH.forEach((d,i)=>{const y0=i*row+3,h=row-6,hist=LIVE.hist[i],tgt=d.t(),span=d.span(tgt),lo=tgt-span,hi=tgt+span;
+    c.strokeStyle="#2b3a78";c.lineWidth=1;c.beginPath();c.moveTo(lx,y0+h/2);c.lineTo(rx,y0+h/2);c.stroke();c.beginPath();c.moveTo(lx,y0+h);c.lineTo(rx,y0+h);c.stroke();
+    c.beginPath();hist.forEach((v,k)=>{const x=lx+(k/(LIVE.n-1))*(rx-lx),y=y0+h-((Math.min(hi,Math.max(lo,v))-lo)/(hi-lo))*h;k?c.lineTo(x,y):c.moveTo(x,y)});c.strokeStyle=LCOL[i];c.lineWidth=2;c.lineJoin="round";c.stroke();
+    const last=hist[hist.length-1],ey=y0+h-((Math.min(hi,Math.max(lo,last))-lo)/(hi-lo))*h;c.fillStyle=LCOL[i];c.beginPath();c.arc(rx,ey,4,0,6.3);c.fill();c.strokeStyle="#111a3d";c.lineWidth=2;c.stroke();
+    c.fillStyle="#eaf0ff";c.font="12px Audiowide,sans-serif";c.textBaseline="middle";c.textAlign="left";c.fillText(d.n,8,y0+h/2-8);c.fillStyle="#9aa8d8";c.font="11px Audiowide,sans-serif";c.fillText(d.u,8,y0+h/2+9);
+    c.fillStyle="#eaf0ff";c.font="13px Audiowide,sans-serif";c.textAlign="left";c.fillText(last.toFixed(d.dec),rx+10,ey)});
+  const lv=$("#livevals");if(lv&&Math.random()<.2)lv.textContent="Dose so far this month: "+S.rad.toFixed(1)+" mSv · Next reading in 0.25 s"}
+/* ---- real NOAA data (works when the page can reach the network) ---- */
+function flareClass(f){if(f>=1e-4)return "X"+(f/1e-4).toFixed(1);if(f>=1e-5)return "M"+(f/1e-5).toFixed(1);if(f>=1e-6)return "C"+(f/1e-6).toFixed(1);if(f>=1e-7)return "B"+(f/1e-7).toFixed(1);return "A"+Math.max(0.1,f/1e-8).toFixed(1)}
+async function getJSON(url){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),6000);try{const r=await fetch(url,{signal:ac.signal,cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}finally{clearTimeout(t)}}
+async function loadNoaa(){
+  const box=$("#noaa");if(!box)return;
+  try{
+    const xr=await getJSON("https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json");
+    const pts=xr.filter(p=>(p.energy||"").indexOf("0.1-0.8")>=0&&(p.flux||p.observed_flux)>0).map(p=>({t:new Date(p.time_tag).getTime(),f:Number(p.flux||p.observed_flux)}));
+    if(!pts.length)throw new Error("no X-ray data");
+    const last=pts[pts.length-1];REALSUN.ok=true;REALSUN.cls=flareClass(last.f);REALSUN.big=pts.slice(-72).some(p=>p.f>=1e-5);
+    let kpTxt="";try{const kp=await getJSON("https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json");const rows=kp.slice(1).filter(r=>r.length>=2);const lastK=rows[rows.length-1];REALSUN.kp=parseFloat(lastK[1]);kpTxt=` · Planetary Kp index <b>${REALSUN.kp}</b> (${REALSUN.kp>=5?"geomagnetic storm":REALSUN.kp>=4?"active":"quiet"})`}catch(_){}
+    box.innerHTML=`<span class="livedot"></span> <b>LIVE</b> from NOAA (GOES satellite). Solar X-ray flux right now: <b>class ${REALSUN.cls}</b>${REALSUN.big?" · ⚠️ a medium or large flare happened in the last 6 hours":""}${kpTxt}. Updated ${new Date(last.t).toUTCString().slice(17,22)} UTC. The solid line is the real Sun over the last 6 hours.`;
+    drawNoaa(pts)}
+  catch(err){
+    REALSUN.ok=false;box.innerHTML=`📡 The live NOAA feed is not available in this window (${esc(String(err.message||err)).slice(0,60)}). Some hosted previews block outside network access. Open the game file directly in a browser to see the real Sun live. The simulated telemetry above still runs.`;const cv=$("#noaacv");if(cv)cv.style.display="none"}}
+function drawNoaa(pts){
+  const cv=$("#noaacv");if(!cv)return;cv.style.display="block";const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(300,cv.clientWidth||600),H=190;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle="#111a3d";c.fillRect(0,0,W,H);
+  const L=46,R=40,T=10,B=22,pw=W-L-R,ph=H-T-B,t0=pts[0].t,t1=pts[pts.length-1].t,lmin=-8,lmax=-3,Y=f=>T+ph-((Math.log10(Math.max(1e-9,f))-lmin)/(lmax-lmin))*ph,X=t=>L+(t-t0)/(t1-t0||1)*pw;
+  [["A",-8],["B",-7],["C",-6],["M",-5],["X",-4]].forEach(([n,e])=>{const y=Y(Math.pow(10,e));c.strokeStyle="#2b3a78";c.lineWidth=1;c.beginPath();c.moveTo(L,y);c.lineTo(L+pw,y);c.stroke();c.fillStyle="#9aa8d8";c.font="11px Audiowide,sans-serif";c.textAlign="right";c.textBaseline="middle";c.fillText(n,L-8,y)});
+  c.beginPath();pts.forEach((p,i)=>{const x=X(p.t),y=Y(p.f);i?c.lineTo(x,y):c.moveTo(x,y)});c.strokeStyle="#c98500";c.lineWidth=2;c.lineJoin="round";c.stroke();
+  const lp=pts[pts.length-1];c.fillStyle="#c98500";c.beginPath();c.arc(X(lp.t),Y(lp.f),4,0,6.3);c.fill();c.strokeStyle="#111a3d";c.lineWidth=2;c.stroke();
+  c.fillStyle="#eaf0ff";c.font="12px Audiowide,sans-serif";c.textAlign="left";c.fillText(flareClass(lp.f),X(lp.t)-pw*.12,Math.max(T+8,Y(lp.f)-12));
+  c.fillStyle="#9aa8d8";c.font="10px Audiowide,sans-serif";c.textAlign="center";c.fillText("6 hours ago",L+30,H-6);c.fillText("now",L+pw-10,H-6);c.save();c.translate(10,T+ph/2);c.rotate(-Math.PI/2);c.fillText("X-ray flux (W/m²)",0,0);c.restore()}
+
+/* ============ ASTRONAUT TRAINING ACADEMY (real training) ============ */
+const trainTimelineSVG=()=>`<svg viewBox="0 0 600 96" class="chart" role="img" aria-label="Astronaut career timeline: selection, about two years of candidate training, mission assignment, mission training, flight"><rect width="600" height="96" fill="var(--surf)" rx="8"/><g font-size="11" fill="#10131f"><rect x="14" y="16" width="86" height="26" fill="#d55181" rx="3"/><text x="57" y="33" text-anchor="middle">Selection</text><rect x="104" y="16" width="170" height="26" fill="#3987e5" rx="3"/><text x="189" y="33" text-anchor="middle">Candidate training (about 2 years)</text><rect x="278" y="16" width="100" height="26" fill="#c98500" rx="3"/><text x="328" y="33" text-anchor="middle">Assignment</text><rect x="382" y="16" width="130" height="26" fill="#199e70" rx="3"/><text x="447" y="33" text-anchor="middle">Mission training</text><rect x="516" y="16" width="72" height="26" fill="#d95926" rx="3"/><text x="552" y="33" text-anchor="middle">Flight</text></g><text x="14" y="70" font-size="11" fill="var(--muted2)">In 2021 NASA chose 10 candidates from more than 12,000 applicants.</text></svg>`;
+const LESSONS=[
+ {t:"Becoming an astronaut",icon:"🎓",body:()=>`<p>NASA chooses astronaut candidates from thousands of applicants. In 2021 it picked <b>10 new candidates from more than 12,000 applications</b>. Applicants need at least a <b>master's degree in a science, technology, engineering or math field</b> (or an equivalent, such as completing test pilot school), plus <b>three years of professional experience</b> or <b>1,000 hours as a jet pilot in command</b>. They must also pass a long-duration spaceflight medical exam.</p><p>After selection, astronaut candidates train for about <b>two years</b> before they can be assigned to a flight. Then they train for their specific mission, and training never really stops.</p>${trainTimelineSVG()}`,fact:"The word “astronaut” comes from Greek words meaning “star sailor”.",q:"About how long does basic astronaut candidate training last?",o:["About two years","About two weeks","About ten years","One afternoon"],c:0,why:"Candidates spend roughly two years learning the basics of spaceflight before they are assigned to a mission."},
+ {t:"Spacewalk training underwater",icon:"🏊",body:()=>`<p>Astronauts rehearse spacewalks in NASA's <b>Neutral Buoyancy Laboratory</b> at Johnson Space Center in Houston, a pool holding about <b>6.2 million gallons</b> of water with full-size mock-ups of space station modules.</p><p>Divers add weights and floats until the astronaut in the spacesuit <b>neither sinks nor floats</b>. That <b>neutral buoyancy</b> feels a lot like weightlessness. Teams often train about <b>seven hours in the pool for every hour</b> of planned spacewalk, so that every move is practised.</p><p>The spacesuit is pressurized to only about a third of normal air pressure, so astronauts breathe pure oxygen and <b>pre-breathe</b> before going outside to avoid decompression sickness, like divers who surface too fast.</p>`,fact:"A typical spacewalk lasts about six to seven hours.",q:"Why do astronauts practise spacewalks underwater?",o:["Neutral buoyancy feels like weightlessness","Space is full of water","Pools are cheaper than suits","It keeps the suit cool"],c:0,why:"In water, weights and floats balance the astronaut so they feel almost weightless, the closest practice on Earth."},
+ {t:"Flying and surviving",icon:"✈️",body:()=>`<p>Many astronauts fly NASA's <b>T-38 jets</b>. Flying a fast jet trains <b>quick decisions, teamwork and clear communication under pressure</b>, skills a crew needs when something goes wrong.</p><p>Astronauts also take <b>survival training</b>. A returning capsule can land far from its target, in an ocean, a desert or a snowy forest. Crews practise <b>water survival</b> (escaping a floating capsule and using life rafts) and wilderness survival, and learn how to stay safe, signal for help and work together until rescuers arrive.</p>`,fact:"Soyuz crews practise survival in winter forests and at sea in case their capsule lands off course.",q:"Why do astronauts train in jets and practise survival skills?",o:["To make fast decisions under pressure and to survive if a landing goes wrong","To win races","Because rockets use jet fuel","To get a pilot's licence for fun"],c:0,why:"Both build calm decision making, teamwork and the skills to survive if a landing does not go to plan."},
+ {t:"Weightlessness and g-forces",icon:"🎢",body:()=>`<p>NASA's <b>reduced-gravity aircraft</b> fly up and down in arcs called parabolas. Each arc gives about <b>20 to 25 seconds of weightlessness</b>, long enough to practise moving and working. It earned the nickname “Vomit Comet” because many people feel sick.</p><p>A <b>centrifuge</b> spins astronauts to feel the heavy forces of launch and re-entry, roughly <b>3 to 4 times their normal weight</b> (3 to 4 g).</p><p>In orbit, body fluids shift toward the head, faces look puffy and many astronauts get <b>space motion sickness</b> for the first few days. Bones and muscles start to weaken, which is why exercise matters.</p>`,fact:"Astronauts can grow taller in space by a few centimetres because the spine is no longer compressed.",q:"About how much weightlessness does one parabola of a reduced-gravity flight give?",o:["About 20 to 25 seconds","About 20 minutes","About 2 hours","None at all"],c:0,why:"Each arc gives a short burst of weightlessness, so the aircraft flies dozens of parabolas in a session."},
+ {t:"Staying healthy in space",icon:"🏋️",body:()=>`<p>Without gravity, the body does less work. Astronauts can lose about <b>1% of bone density every month</b> in orbit unless they fight it. On the ISS, crews <b>exercise about two hours a day</b> on a treadmill, a bike and a resistance machine called <b>ARED</b>.</p><p>Doctors on the ground (<b>flight surgeons</b>) watch each astronaut's health, sleep and mood. NASA's <b>Twins Study</b> compared astronaut Scott Kelly, who spent nearly a year on the ISS, with his identical twin Mark on Earth, to see how long spaceflight changes the body.</p><p>Food, sleep and time to relax are scheduled on purpose, because a tired or lonely crew makes mistakes.</p>`,fact:"Astronauts' vision can change on long flights, and NASA studies why.",q:"Why do ISS astronauts exercise about two hours every day?",o:["To protect their bones and muscles","To burn off rocket fuel","Because it is a rule from Russia only","To stay awake all night"],c:0,why:"Weightlessness weakens bones and muscles, and daily exercise is the main defence."},
+ {t:"Radiation",icon:"☢️",body:()=>`<p>Space is full of radiation. <b>Galactic cosmic rays</b> come from far outside the solar system, and <b>solar particle events</b> burst from the Sun during flares. On Earth, the atmosphere and magnetic field protect us. In orbit, and especially on the Moon, there is much less protection.</p><p>Astronauts wear <b>dosimeters</b> that measure their exposure, and NASA sets limits. In 2022 NASA adopted a <b>600 mSv career limit</b> for all astronauts. For comparison, people on Earth get about 3 mSv a year from natural background radiation, and ISS crews get roughly 50 to 100 mSv over six months.</p><p>During a solar storm, crews <b>move to the best-shielded area</b>. The Orion spacecraft is designed so the crew can build a small storm shelter from stowed supplies.</p>`,fact:"Water, regolith and dense supplies make good radiation shields.",q:"What should a crew do during a solar particle event?",o:["Move to the best-shielded area","Go outside to look","Turn off all the lights","Ignore it"],c:0,why:"Shelter in the best-shielded place and wait. Dose depends on how much shielding is between you and the storm."},
+ {t:"Life support systems",icon:"🫧",body:()=>`<p>On the ISS everything is recycled. The <b>Oxygen Generation Assembly</b> splits water into oxygen and hydrogen with electricity. The <b>Carbon Dioxide Removal Assembly</b> pulls the CO₂ out of the air. A <b>Sabatier reactor</b> combines CO₂ with hydrogen to make water. The <b>Water Recovery System</b> recycles about <b>98%</b> of water, including sweat, breath moisture and urine.</p><p>An astronaut needs about <b>0.84 kg of oxygen every day</b>, plus water and food. Because resupply is slow and expensive, astronauts are trained to watch and repair these systems, even fixing the toilet and water recycler.</p>`,fact:"The ISS has hosted astronauts continuously since November 2000.",q:"Which ISS system makes oxygen by splitting water?",o:["The Oxygen Generation Assembly","The Sabatier reactor","The treadmill","The airlock"],c:0,why:"The Oxygen Generation Assembly uses electricity to split water into oxygen and hydrogen."},
+ {t:"Emergencies and problem solving",icon:"🚨",body:()=>`<p>Astronauts prepare for <b>fire, sudden loss of cabin pressure and toxic air</b>. In simulators, instructors <b>secretly add failures</b> to test the crew and the flight controllers in Mission Control. The aim is to make the right response <b>calm and almost automatic</b>.</p><p>History shows why. On <b>Apollo 13</b> (1970), the crew and engineers on the ground built a carbon dioxide filter out of spare parts. During the <b>Apollo 11</b> landing, a computer alarm sounded and Mission Control correctly called “Go”. In 2015, an ISS ammonia alarm sent the crew to the Russian segment until controllers checked for a leak.</p><p>In Mission Control, the <b>CAPCOM</b> is an astronaut who talks to the crew, so the message comes from someone who understands their job.</p>`,fact:"Astronauts rehearse the same emergencies many times so checklists feel familiar.",q:"Why do crews rehearse failures in simulators over and over?",o:["So the right response is calm and almost automatic","To make the simulator break","To save fuel","For fun"],c:0,why:"Practice under pressure builds calm, fast responses that work when the real emergency comes."},
+ {t:"Teamwork, language and robots",icon:"🤝",body:()=>`<p>The ISS is run by five space agencies: <b>NASA, Roscosmos, ESA, JAXA and the Canadian Space Agency</b>. NASA astronauts learn <b>Russian</b> so they can work with Russian crew and understand Soyuz and Russian segment systems.</p><p>To practise living and working as a team, astronauts take expedition training in remote wilderness and spend time in an <b>undersea habitat</b> (NASA's NEEMO missions). They also learn to operate the station's <b>Canadarm2 robotic arm</b> and many other systems.</p><p>Teamwork skills such as clear communication, sharing the workload and speaking up about safety are trained as seriously as technical skills.</p>`,fact:"Astronauts also spend a lot of time learning each other's experiments and jobs so they can step in.",q:"Why do NASA astronauts learn Russian?",o:["The ISS is an international partnership and many systems and crew are Russian","Because NASA is in Russia","It is easy","So they can read the Moon"],c:0,why:"The station is built and operated by several nations, and Russian is a working language aboard."},
+ {t:"Training for the Moon",icon:"🌙",body:()=>`<p>Apollo crews trained with geologists on field trips to <b>lava fields, volcanic craters and impact craters</b> such as Meteor Crater in Arizona. They learned to <b>recognize rock types, take careful notes and photographs, and collect the most valuable samples</b> in a few hours. The last Apollo crew included geologist Harrison “Jack” Schmitt.</p><p>On the Moon, gravity is about <b>one sixth of Earth's</b>, so astronauts bound instead of walk. The suit is stiff, lunar dust is sharp and sticky, and radio signals take about <b>1.3 seconds</b> each way to Earth. NASA's <b>Artemis program</b> plans to land astronauts near the Moon's south pole, where ice may hide in shadowed craters.</p>`,fact:"Apollo astronauts brought back about 382 kg of Moon rock and soil.",q:"Why did Apollo astronauts do geology field training?",o:["To recognize and collect the most scientifically valuable rocks","To learn to drive","To practise cooking","To find gold"],c:0,why:"Limited time on the Moon meant they had to choose the best samples quickly, so geology training mattered."}
+];
+let TQ={phase:"learn",tried:[],ok:false};
+function startTraining(){S.phase="training";S.train=S.train||{i:0,score:0,done:false};save();go("training")}
+function renderTraining(){
+  const T=S.train||(S.train={i:0,score:0,done:false});
+  if(T.i>=LESSONS.length)return `<div class="card"><h2>🎓 Astronaut training complete!</h2><p>You passed all ${LESSONS.length} lessons of astronaut training and answered <b>${T.score}</b> of ${LESSONS.length} quiz questions correctly on the first try.</p><div class="debrief"><b>🏅 Certificate of Astronaut Training</b><br>Awarded for completing a course based on real NASA astronaut training: selection, underwater spacewalk practice, survival and flying, weightlessness, health, radiation, life support, emergencies, teamwork and Moon geology.</div><p class="good">Bonus: +${T.score*5} Science Points.</p><button class="primary" onclick="finishTraining()">Next: how to play →</button></div>`;
+  const L=LESSONS[T.i],head=`<div class="row spread"><h2>🎓 Astronaut training: lesson ${T.i+1} of ${LESSONS.length}</h2><button class="sm" onclick="skipTraining()">Skip training</button></div><div class="bar blue" style="margin:6px 0"><i style="width:${Math.round(T.i/LESSONS.length*100)}%"></i></div>`;
+  if(TQ.phase!=="quiz")return `<div class="card">${head}<p class="small muted">Step 1 of 2: learn how real astronauts train. A quiz comes next.</p><h3>${L.icon} ${esc(L.t)}</h3>${L.body()}<div class="debrief"><b>💡 Did you know?</b><br>${esc(L.fact)}</div><button class="primary" onclick="startQuiz2()">I'm ready. Take the quiz →</button></div>`;
+  return `<div class="card">${head}<p class="small muted">Step 2 of 2: quiz on “${esc(L.t)}”.</p><p><b>${esc(L.q)}</b></p>${L.o.map((x,j)=>`<button class="opt ${TQ.ok&&j===L.c?"sel":""}" ${TQ.ok||TQ.tried.includes(j)?"disabled":""} onclick="trainAnswer(${j})">${esc(x)}</button>`).join("")}${TQ.tried.length&&!TQ.ok?`<p class="bad small">Not quite. Try another answer, or review the lesson.</p>`:""}${TQ.ok?`<div class="debrief"><b class="good">Correct!</b> ${esc(L.why)}</div><button class="primary" onclick="trainNext()">${T.i+1<LESSONS.length?"Next lesson →":"Finish training →"}</button>`:`<button class="sm" onclick="reviewLesson()">📖 Review the lesson</button>`}</div>`}
+function startQuiz2(){TQ={phase:"quiz",tried:[],ok:false};render();window.scrollTo(0,0)}
+function reviewLesson(){TQ.phase="learn";render();window.scrollTo(0,0)}
+function trainAnswer(j){const L=LESSONS[S.train.i];if(j===L.c){if(!TQ.tried.length)S.train.score++;TQ.ok=true}else TQ.tried.push(j);save();render()}
+function trainNext(){S.train.i++;TQ={phase:"learn",tried:[],ok:false};save();render();window.scrollTo(0,0)}
+function skipTraining(){S.train.i=LESSONS.length;S.train.score=0;TQ={phase:"learn",tried:[],ok:false};finishTraining()}
+function finishTraining(){const T=S.train;if(!T.done){T.done=true;S.sp+=T.score*5}TQ={phase:"learn",tried:[],ok:false};S.phase="howto";save();go("howto")}
+/* ============ HOW TO PLAY (separate quick guide) ============ */
+function renderHowTo(){
+  const c=(i,t,b)=>`<div class="card" style="margin:0"><h3>${i} ${t}</h3><p class="small">${b}</p></div>`;
+  return `<div class="card"><h2>🎮 How to play Outpost 7</h2><p class="muted">A quick guide to the game. (Training taught you how real astronauts prepare. This page is about the game itself.) The full rulebook is the 📖 button at the top.</p>
+  <div class="grid">${c("🎯","The goal",`Survive ${NIGHTS} days, bring home ${MD().samp} rock samples and stay under ${RADMAX} mSv of radiation.`)}${c("⏱️","Your day",`You get hours every morning. Spend them on Maintain, Science, Explore, Build or Mission tabs, then press End the day.`)}${c("📊","The meters",`Keep oxygen, water, food, power, health and morale up. Oxygen at 0 ends the mission.`)}${c("🌗","Dark days",`Days 1 to 15 are sunlit. Days 16 to ${NIGHTS} are dark, so solar panels stop. Build a reactor and batteries before then.`)}${c("☢️","Radiation",`It adds up. Shelter from storms and build shielding. 120 mSv makes you sick and ${RADMAX} mSv ends the mission.`)}${c("🏗️","Building",`In the Build tab, type what you want to build, pick a material, then spend hours and power to finish it.`)}${c("🧭","Exploring",`Trips outside cost hours, oxygen and a little radiation. Visit sample sites, then load samples into the capsule.`)}${c("🎲","Problems",`Major problems strike often. Every choice costs something. After you choose, you learn the real NASA story.`)}${c("📈","The Data tab",`Charts show your meters, materials, power and radiation over time so you can plan ahead.`)}</div>
+  <div class="row" style="margin-top:12px"><button class="primary" onclick="startDay()">🚀 Begin Day 1 →</button><button onclick="openManual()">📖 Open the full manual</button></div></div>`}
+
+/* ============ SCENE ============ */
+function modSVG(k,x,gy,sc){const m=MODK[k],c1=m.c[0],c2=m.c[1],sh=m.sh;let b="";
+  if(sh==="dome")b=`<path d="M-22,0 A22,20 0 0 1 22,0Z" fill="${c1}" stroke="rgba(0,0,0,.4)"/>`;
+  else if(sh==="box")b=`<rect x="-24" y="-24" width="48" height="24" rx="3" fill="${c1}" stroke="rgba(0,0,0,.4)"/>`;
+  else if(sh==="tank")b=`<rect x="-24" y="-22" width="20" height="22" rx="7" fill="${c1}"/><rect x="4" y="-22" width="20" height="22" rx="7" fill="${c2}"/>`;
+  else if(sh==="panel")b=`<path d="M-26,-6 L-18,-30 L26,-30 L22,-6Z" fill="${c1}"/><path d="M0,0 V-8" stroke="#9aa3bf" stroke-width="3"/>`;
+  else if(sh==="mound")b=`<path d="M-30,0 Q0,-34 30,0Z" fill="${c1}"/>`;
+  else if(sh==="reactor")b=`<rect x="-8" y="-34" width="16" height="34" fill="${c1}"/><path d="M-20,-8 H20 M-16,-18 H16" stroke="#9aa3bf" stroke-width="3"/><circle cx="0" cy="-36" r="5" fill="#fbbf24"/>`;
+  else if(sh==="mast")b=`<path d="M0,0 V-40" stroke="#cbd0e6" stroke-width="3"/><circle cx="0" cy="-42" r="5" fill="${c1}"/>`;
+  else if(sh==="dish")b=`<path d="M0,0 V-18" stroke="#9aa3bf" stroke-width="4"/><ellipse cx="0" cy="-28" rx="22" ry="12" fill="${c1}" transform="rotate(-20 0 -28)"/>`;
+  return `<g transform="translate(${x},${gy}) scale(${sc})">${b}<text y="-6" text-anchor="middle" font-size="14">${m.icon}</text></g>`}
+function baseScene(night){
+  const W=800,H=330,gy=262,dark=night||(S.mode&&isDark(S.day));
+  let o=`<svg viewBox="0 0 ${W} ${H}" class="scene" role="img" aria-label="Outpost 7 on the Moon">`+skyGround(W,H,gy,false,"b");
+  if(!dark)o+=`<circle cx="90" cy="78" r="16" fill="#ffd166"/><circle cx="90" cy="78" r="30" fill="#ffd166" opacity=".18"/>`;
+  [0,1,2].forEach(i=>{const x=290+i*34;o+=`<path d="M${x},${gy} V${gy-16}" stroke="#9aa3bf" stroke-width="2"/><path d="M${x-14},${gy-16} L${x-9},${gy-34} L${x+14},${gy-34} L${x+14},${gy-16}Z" fill="#2563eb"/><path d="M${x-14},${gy-16} L${x-9},${gy-34} L${x+14},${gy-34} L${x+14},${gy-16}Z" fill="#a9834f" opacity="${Math.min(.9,S.dust/110).toFixed(2)}"/>`});
+  o+=`<g transform="translate(130,${gy}) scale(1.7)">${habSVG()}</g><g transform="translate(765,${gy}) scale(.9)">${landerSVG()}</g>`;
+  const shown=(S.modules||[]).slice(0,28);
+  shown.forEach((m,i)=>{const row=Math.floor(i/7),col=i%7,sc=1-row*.14;o+=modSVG(m.t,410+col*46+row*18,gy-row*20,sc)});
+  if(dark)o+=`<rect width="${W}" height="${H}" fill="#000" opacity=".45"/><g transform="translate(130,${gy}) scale(1.7)"><circle cx="0" cy="-18" r="5" fill="#ffd166"/></g>`;
+  if(S.alert)o+=`<defs><linearGradient id="ra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e" stop-opacity=".55"/><stop offset="1" stop-color="#f43f5e" stop-opacity="0"/></linearGradient></defs><rect width="${W}" height="220" fill="url(#ra)"><animate attributeName="opacity" values=".35;1;.35" dur="1.6s" repeatCount="indefinite"/></rect><text x="400" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="#fecdd3">☢️ RADIATION ALERT</text>`;
+  const done=S.over&&S.over.win?NIGHTS:Math.max(0,S.day-1);
+  o+=`<rect x="14" y="12" width="182" height="9" rx="4" fill="none" stroke="#e5e7eb" opacity=".6"/><rect x="14" y="12" width="${Math.round(182*done/NIGHTS)}" height="9" rx="4" fill="#e5e7eb"/><text x="14" y="38" font-size="11" style="fill:var(--muted)">Days survived: ${done} of ${NIGHTS}</text>`;
+  return o+`</svg>`}
+/* ============ HUD ============ */
+function hudHTML(){
+  const cap=capP(),dr=MD().dr,counter=(k,icon,name,unit,perDay)=>{const v=Math.round(S.res[k]),pc=v<25?"danger":v<50?"warn":"";return `<div class="cnt ${pc}" title="${name}"><div class="cn">${icon} ${name}</div><div class="cv">${v}<span>${unit}</span></div><div class="cd">▼ about ${perDay} a day</div></div>`};
+  const bar=r=>{const v=S.res[r[0]],m=r[0]==="power"?cap:100,pc=Math.max(0,Math.min(100,v/m*100));return `<div class="hb" title="${r[2]}"><span>${r[1]} ${r[2]} ${Math.round(v)}</span><div class="bar ${pc<25?"danger":pc<50?"warn":""}"><i style="width:${pc}%"></i></div></div>`};
+  const rp=Math.min(100,S.rad/RADMAX*100),spToday=S.sp-(S.spDay0===undefined?S.sp:S.spDay0);
+  return `<div class="hrow"><span class="hchip strong">🌑 Day ${S.day}/${NIGHTS}</span><span class="hchip">${isDark(S.day)?"🌑 Dark day":"☀️ Sunlit day"}</span><span class="hchip">🕒 ${clock()}</span><span class="hchip">🌡️ ${surfaceTemp()} °C outside</span><span class="hchip">⚡ ${S.energy}h left</span><span class="hchip">🛡️ ${armorEff().toFixed(1)}/3</span></div><div class="counters">${counter("o2","🫧","Oxygen","%",Math.round((DAY.o2+NIGHT.o2)*dr))}${counter("water","💧","Water","%",Math.round((DAY.water+NIGHT.water)*dr))}${counter("food","🍲","Food","%",Math.round((DAY.food+NIGHT.food)*dr))}<div class="cnt sp" title="Science Points"><div class="cn">⭐ Science Points</div><div class="cv">${S.sp}<span>SP</span></div><div class="cd">${spToday>=0?"▲ +"+spToday:"▼ "+spToday} today</div></div></div><div class="hbars">${["power","health","morale"].map(k=>bar(RES.find(r=>r[0]===k))).join("")}<div class="hb" title="Radiation dose this month"><span>☢️ Radiation ${Math.round(S.rad)}/${RADMAX} mSv</span><div class="bar ${rp>=70?"danger":rp>=40?"warn":""}"><i style="width:${rp}%"></i></div></div></div>`}
+function tip(){
+  if(!MD().hints)return"";let t;
+  const low=RES.slice(0,5).sort((a,b)=>S.res[a[0]]-S.res[b[0]])[0];
+  const m={o2:"Service the oxygen scrubbers.",water:"Recycle water.",food:"Cook a meal.",power:"Tune the battery bank or brush the panels.",health:"Exercise or do a medical check."};
+  if(S.res[low[0]]<45)t=low[2]+" is low. "+m[low[0]];
+  else if(S.rad>120)t="Radiation dose is high. Build a radiation shelter and avoid long trips outside.";
+  else if(S.day>=4&&S.loaded.length<MD().samp)t="Mission needs "+MD().samp+" rock samples. Use the Explore tab to fetch them, then load them in the Mission tab.";
+  else if(S.dust>50)t="Panels are dusty. Brush them before you lose power.";
+  else if(S.energy>=3)t="Spare hours? Science tasks earn Science Points, and the Build tab lets you construct modules.";
+  else t="When you are out of hours, end the day.";
+  return `<p class="small good" style="margin:6px 0 0">💡 Tip: ${esc(t)}</p>`}
+/* ============ MODAL ============ */
+function openModal(html,btn){const m=$("#modal");m.innerHTML='<div class="modalbox">'+html+(btn===false?"":'<div class="row" style="margin-top:10px"><button class="primary" onclick="closeModal()">OK</button></div>')+'</div>';m.hidden=false}
+function closeModal(){const m=$("#modal");m.hidden=true;m.innerHTML=""}
+/* ============ DAY SCREEN ============ */
+const OUTCH={dust:1,shelter:1,isru:1};
+const isOutSci=a=>!!a[8];
+function renderDay(){
+  const T=S.tab||"maintain",tabs=[["maintain","🛠️","Maintain"],["science","🔬","Science"],["explore","🧭","Explore"],["build","🏗️","Build"],["mission","🎯","Mission"],["data","📈","Data"],["archive","📜","Archive"],["base","📊","Base"]];
+  return `<div class="hudcard">${hudHTML()}${tip()}</div>
+  <div class="card">${baseScene(false)}<p class="small"><b>📡 NASA fact of the day:</b> ${esc(FACTS[(S.day-1)%FACTS.length])}</p></div>
+  <div class="card"><div class="row tabsrow">${tabs.map(t=>`<button class="${T===t[0]?"primary":""}" onclick="S.tab='${t[0]}';render()">${t[1]} ${t[2]}</button>`).join("")}</div>${tabBody(T)}</div>
+  <div class="card row spread"><div><b>⚡ ${S.energy} hours left today</b><br><span class="small muted">When you end the day, tonight's event happens. Hours do not carry over.</span></div><button class="primary" onclick="endDay()">🌙 End the day</button></div>`}
+function tabBody(T){
+  const free=MD().free;
+  if(T==="maintain")return `<p class="small muted">Everyday survival jobs. Each uses hours. Work outside costs a little suit oxygen and radiation dose.</p>`+CH.map(c=>{const maxed=c.max&&S.armor>=c.max;const fx=Object.entries(c.fx).filter(([k])=>k!=="armor"&&k!=="dust").map(([k,v])=>RIC[k]+(v>0?"+":"")+v).join(" ");return `<button class="opt" ${S.energy<c.e||maxed?"disabled":""} onclick="doChore('${c.id}')">${c.icon} ${esc(c.n)} <span class="small muted">⚡${c.e}h ${fx}${c.id==="dust"?" 🧹":""}${c.id==="shelter"?" 🛡️+1":""}</span><span class="ctx">${OUTCH[c.id]?"🌑 Outside · ":"🏠 Inside · "}${esc(c.ctx)}</span></button>`}).join("");
+  if(T==="science"){const levels=["Very easy","Easy","Medium","Hard","Very hard"];let h=`<p class="small muted">Science tasks cost hours and a little power, and earn Science Points. Harder tasks unlock later: Medium on day 3, Hard on day 5, Very hard on day 8.</p>`;levels.forEach(lv=>{const rows=ACT.map((a,i)=>[a,i]).filter(x=>x[0][7]===lv);if(!rows.length)return;h+=`<p><b>${lv}</b> <span class="small muted">· ⚡${rows[0][0][1]}h each · +${rows[0][0][6]} to +${Math.max(...rows.map(x=>x[0][6]))} SP</span></p>`+rows.map(([a,i])=>{const dn=S.done[i],lock=unlockDay(a)>S.day,pc=Math.ceil(a[2]/4),dis=dn||lock||S.energy<a[1];return `<button class="opt" style="opacity:${dn?.55:1}" ${dis?"disabled":""} onclick="doSci(${i})"><b>${esc(a[0])}</b> <span class="tag">${isOutSci(a)?"🌑 outside":"🔬 inside"}</span><span class="tag">⏱️ ${a[1]}h</span><span class="tag">⚡ ${pc?"power −"+pc:"no power"}</span><span class="tag good">+${a[6]} SP</span>${lock?`<span class="tag">unlocks day ${unlockDay(a)}</span>`:""}${dn?`<span class="ctx">${esc(a[5])}</span>`:""}</button>`}).join("")});return h}
+  if(T==="data")return dataBody();
+  if(T==="explore")return exploreBody();
+  if(T==="build")return buildBody();
+  if(T==="mission")return missionBody();
+  if(T==="archive")return `<p class="small muted">Mission Control files on the six lost crews. Travel to a wreck with the Explore tab to read their last logs. Read: <b>${storiesFound()}/6</b>.</p>`+STORIES.map(st=>{const f=S.poi["poi_wreck"+st.n];return `<div class="card" style="margin:6px 0"><b>🕯️ Outpost ${st.n} “${esc(st.name)}”</b><br><span class="small muted">${st.crew.map(esc).join(" · ")} · lost on night ${st.night}</span><p class="small">${f?"":esc(st.head)+"<br><span class=muted>Logs unread. Search the wreck of Outpost "+st.n+" from the Explore tab.</span>"}</p>${f?`<div class="small">${st.logs.map(l=>`<p><b>${esc(l[0])}</b> ${esc(l[1])}</p>`).join("")}<div class="debrief"><b>${esc(st.real[0])}</b><br>${esc(st.real[1])}</div></div>`:""}</div>`}).join("");
+  const dr=MD().dr,dark=isDark(S.day),gen=dark?0:Math.round(DAY.gen*(1-S.dust/100)),use=Math.round(DAY.use*dr),rb=(RADBASE*MD().radm*shieldF()*siteOf().radf).toFixed(2),st=siteOf();
+  return `<div class="small"><p><b>${st.icon} ${esc(st.n)} · ${dark?"🌑 Dark":"☀️ Sunlit"} · Day ${S.day} of ${NIGHTS}</b></p><p>Dark days at this site: ${st.dark[0]} to ${st.dark[1]}.</p><p>⚡ Solar today: +${gen}${dark?" (no sunlight)":""}, base use −${use}. Panels ${Math.round(S.dust)}% dusty. Power storage ${Math.round(S.res.power)}/${capP()}.</p><p>🌙 A full day and night uses about 🫧 −${Math.round((DAY.o2+NIGHT.o2)*dr)} 💧 −${Math.round((DAY.water+NIGHT.water)*dr)} 🍲 −${Math.round((DAY.food+NIGHT.food)*dr)}, and the heaters use ⚡ −${Math.round(NIGHT.power*dr)}.</p><p>☢️ Baseline radiation here: ${rb} mSv per day inside your habitat (shield ${armorEff().toFixed(1)}/3). Total this month: ${S.rad.toFixed(1)} of ${RADMAX} mSv.</p><p>🏗️ Modules: ${S.modules.length?S.modules.map(m=>MODK[m.t].icon+" "+MODK[m.t].n+(m.buried?" (buried)":"")).join(", "):"none yet"}</p><p>⭐ ${S.sp} SP · Mission Control sends +5 SP every day.</p></div><div class="debrief"><b>📡 NASA data behind this game</b>${NASA.map(n=>`<p class="small"><b>${esc(n[0])}.</b> ${esc(n[1])}</p>`).join("")}</div>`+(free?`<button class="sm" onclick="S.res={o2:100,water:100,food:100,power:100,health:100,morale:100};S.dust=0;S.rad=0;save();render()">🧪 Refill all</button>`:"")+(S.log.length?`<div class="log" style="margin-top:8px">${S.log.map(l=>`<p>${esc(l)}</p>`).join("")}</div>`:"")}
+function doChore(id){const c=CH.find(x=>x.id===id);if(S.energy<c.e){toast("Not enough hours left today.");return}S.energy-=c.e;let t=applyFx(c.fx,0);if(OUTCH[id]){S.res.o2=clamp(S.res.o2-3);t+="  🫧 -3 (suit)  "+applyFx({rad:.3},0)}log(c.icon+" "+c.n+(t?" → "+t:""));toast(c.fact);save();render()}
+function doSci(i){const a=ACT[i],pc=Math.ceil(a[2]/4);if(S.done[i]||S.energy<a[1])return;S.energy-=a[1];S.res.power=clamp(S.res.power-pc);S.res.morale=clamp(S.res.morale+2);if(isOutSci(a)){S.res.o2=clamp(S.res.o2-3);applyFx({rad:.3},0)}S.done[i]=1;const pts=actPts(a);S.sp+=pts;log("🔬 "+a[0]+" → +"+pts+" SP");toast("+"+pts+" SP: "+a[5]);save();render()}
+/* ============ EXPLORE ============ */
+const PAD={x:760,y:450};
+function destList(){const d=[{id:"field",label:"Field site beside the base",kind:"site",type:"regolith",x:850,y:220,task:2}];POIS.forEach(p=>d.push({id:"poi_"+p.id,label:p.label,kind:p.kind,type:p.type,n:p.n,x:p.x,y:p.y,task:p.kind==="lava"?3:p.kind==="wreck"?1:2}));return d}
+function tripCost(d){const wf=Math.max(.3,1-sumFx("walk"));let dist=Math.hypot(d.x-PAD.x,d.y-PAD.y);if(d.kind==="ice")dist*=siteOf().ice;const hrs=Math.max(0,Math.ceil(2*dist/320*wf)),o2=Math.ceil(2*dist/130*MD().dr*wf),rad=Math.round((hrs+d.task)*.08*10)/10;return {dist,hrs,o2,rad,total:hrs+d.task,km:dist*1.5/1000}}
+function destDone(d){return d.kind==="wreck"?!!S.poi[d.id]:d.kind==="site"?S.samples.includes(d.type):d.kind==="ice"?!!S.poi.ice:!!S.poi.lava}
+function destText(d){if(d.kind==="wreck")return "Wreck of Outpost "+d.n+" (read the crew's last logs, find salvage)";if(d.kind==="site"){const t=SAMPLES.find(x=>x.id===d.type);return "Collect "+t.n+" sample"}if(d.kind==="ice")return "Drill for water ice (also counts as a sample)";return "Explore the lava tube (shelter knowledge)"}
+function exploreBody(){
+  return `<p class="small muted">Trips outside cost hours (round trip plus the task), suit oxygen and a small radiation dose, and there is a chance of an EVA incident.${sumFx("walk")>0?" Your vehicles cut travel costs.":" A Lunar Terrain Vehicle garage would halve travel costs."}</p>`+destList().map(d=>{const c=tripCost(d),dn=destDone(d),label=d.kind==="site"&&d.id!=="field"?SAMPLES.find(x=>x.id===d.type).icon+" "+d.label:d.kind==="wreck"?"🕯️ "+d.label:d.kind==="ice"?"🧊 "+d.label:d.kind==="lava"?"🕳️ "+d.label:"🟫 "+d.label;
+    return `<button class="opt" ${dn||S.energy<c.total?"disabled":""} onclick="goTrip('${d.id}')">${esc(label)} ${dn?"✅ done":""}<span class="ctx">${esc(destText(d))} · ${c.km.toFixed(1)} km away · ⚡${c.total}h · 🫧 -${c.o2} · ☢️ +${c.rad} mSv</span></button>`}).join("")}
+function goTrip(id){
+  const d=destList().find(x=>x.id===id),c=tripCost(d);if(S.energy<c.total){toast("Not enough hours left for that trip.");return}
+  S.energy-=c.total;S.res.o2=clamp(S.res.o2-c.o2);applyFx({rad:c.rad},0);log("🧭 Trip to "+d.label+": "+c.total+"h, 🫧 -"+c.o2+", ☢️ +"+c.rad+" mSv");
+  if(rnd()<.3*MD().sev*(1-Math.min(.6,sumFx("eva")))){const e=pickEva();S.ev={id:e.id,chosen:null,fx:"",kind:"eva",after:id};S.phase="event";save();go("event");return}
+  arriveAt(id)}
+function arriveAt(id){
+  const d=destList().find(x=>x.id===id);let html="";
+  if(d.kind==="wreck"){const w=WLOG[d.n-1],t=applyFx(w[1],0);S.poi[id]=1;S.sp+=6;let bonus="";if(storiesFound()>=6&&!S.poi.allstories){S.poi.allstories=1;S.sp+=30;S.res.morale=clamp(S.res.morale+15);bonus="You have now read all six logs. Their message is clear: check the air, clean the panels, shelter from radiation, patch the walls, keep warm and look after each other. +30 SP and a morale boost."}log("🔦 Searched Outpost "+d.n+" → "+t+" (+6 SP)");const st=STORIES[d.n-1];html=`<b>📜 Outpost ${d.n}: “${esc(st.name)}”</b>${storyHTML(st)}<p class="small good">${esc(w[2])} (${esc(t)}, +6 SP) ${esc(bonus)}</p>`}
+  else if(d.kind==="site"){const t=SAMPLES.find(x=>x.id===d.type);S.samples.push(d.type);S.sp+=8;log("⛏️ Collected "+t.n+" → +8 SP");html=`<b>${t.icon} ${esc(t.n)} collected! +8 SP</b><p class="small">${esc(t.fact)}</p>`}
+  else if(d.kind==="ice"){S.poi.ice=1;if(!S.samples.includes("ice"))S.samples.push("ice");const t=applyFx({water:30},0);S.sp+=10;log("🧊 Drilled water ice → "+t+" (+10 SP)");html=`<b>🧊 Water ice found! ${esc(t)} +10 SP</b><p class="small">${esc(SAMPLES.find(x=>x.id==="ice").fact)}</p>`}
+  else{S.poi.lava=1;S.armor=Math.min(3,S.armor+1);S.res.morale=clamp(S.res.morale+6);S.sp+=12;log("🕳️ Explored the lava tube → +1 armor, +12 SP");html=`<b>🕳️ Lava tube explored! +1 shelter armor, +12 SP</b><p class="small">Lava tubes could shelter bases from radiation, micrometeoroids and temperature swings.</p>`}
+  save();render();openModal(html)}
+/* ============ MISSION ============ */
+function missionBody(){
+  const req=MD().samp,col=S.samples.length,ld=S.loaded.length,ns=S.over&&S.over.win?NIGHTS:S.day-1;const g=(k,t)=>`<p class="small ${k?"good":""}">${k?"✅":"⬜"} ${t}</p>`;
+  return `<p><b>Mission goals</b></p>${g(ns>=NIGHTS,"Survive "+NIGHTS+" days ("+ns+"/"+NIGHTS+")")}${g(col>=req,"Collect "+req+" rock samples ("+col+"/"+req+")")}${g(ld>=req,"Load them into the return capsule ("+ld+"/"+req+")")}${g(S.rad<RADMAX,"Stay under "+RADMAX+" mSv of radiation ("+Math.round(S.rad)+")")}<p class="small muted">Samples come from 8 places. Use the Explore tab to go and get them.</p>`+
+  SAMPLES.map(t=>{const got=S.samples.includes(t.id);return `<div class="card" style="margin:6px 0"><b>${t.icon} ${esc(t.n)}</b> ${got?(S.loaded.includes(t.id)?"📦 loaded":"🎒 collected"):"⬜ not yet"}<p class="small muted">${esc(t.fact)}</p></div>`}).join("")+
+  `<button class="opt" ${S.energy<1||ld>=col?"disabled":""} onclick="loadSamples()">📦 Load samples into the return capsule <span class="tag">⚡1h</span><span class="ctx">The capsule takes them home to NASA's labs.</span></button><button class="opt" ${S.energy<1?"disabled":""} onclick="startQuiz()">❓ Mission Control quiz <span class="tag">⚡1h</span><span class="ctx">Answer questions to earn Science Points.</span></button>`}
+function loadSamples(){const n=S.samples.filter(x=>!S.loaded.includes(x)).length;if(!n){toast("No new samples to load.");return}if(S.energy<1){toast("Not enough hours left today.");return}S.energy-=1;S.loaded=S.samples.slice();log("📦 Loaded "+n+" sample(s) into the return capsule.");toast("Samples are safe in the return capsule: "+S.loaded.length+"/"+MD().samp);save();render()}
+
+/* ============ DAY FLOW ============ */
+function checkFail(){if(MD().free)return false;let c=null;if(S.res.o2<=0)c=["o2","oxygen"];else if(S.res.health<=0)c=["health","health"];else if(S.rad>=RADMAX)c=["rad","radiation"];if(c){S.over={win:false,cause:c[0],why:c[1]};S.phase="end";save();go("end");return true}return false}
+function startDay(){
+  S.phase="day";S.alert=0;S.spDay0=S.sp;closeModalSafe();
+  const arrived=S.orders.filter(o=>o.arrive<=S.day);S.orders=S.orders.filter(o=>o.arrive>S.day);
+  arrived.forEach(o=>{if(o.t[0]==="p"){const k=o.t.slice(2);S.mat[k]+=6;log("📦 Material pack delivered: 6 "+MATK[k][1])}else{const s=SUP[+o.t.slice(2)],t=applyFx(s.fx,0);log("📦 Supplies delivered: "+s.n+" → "+t)}});
+  const cg=cargoDrop();toast("🚀 Cargo lander: "+(cg||"nothing today")+(arrived.length?" + your orders":""));
+  recordHist();
+  S.tab=S.tab||"maintain";
+  if(rnd()<MD().prob){const e=pickEvent("morning");S.ev={id:e.id,chosen:null,fx:"",kind:"morning"};S.phase="event";save();go("event");return}
+  save();go("day")}
+function closeModalSafe(){const m=$("#modal");if(m){m.hidden=true;m.innerHTML=""}}
+function endDay(){
+  const dr=MD().dr,r=S.res,dark=isDark(S.day),gen=dark?0:Math.round(DAY.gen*(1-S.dust/100)),use=Math.round(DAY.use*dr);
+  r.o2-=Math.round(DAY.o2*dr);r.water-=Math.round(DAY.water*dr);r.food-=Math.round(DAY.food*dr);r.power+=gen-use;r.health-=Math.round(DAY.health*dr);r.morale-=DAY.morale;
+  r.morale+=siteOf().morale;
+  const rb=Math.round(RADBASE*MD().radm*shieldF()*siteOf().radf*10)/10;S.rad=Math.round((S.rad+rb)*10)/10;
+  log((dark?"🌑 Day ":"☀️ Day ")+S.day+" ends: "+(dark?"no sunlight":"solar +"+gen+" power ("+Math.round(S.dust)+"% dust)")+", base used "+use+". Radiation +"+rb+" mSv.");
+  S.dust=clamp(S.dust+DAY.dust);clampRes();
+  if(S.modules.length){const out=[];for(const m of S.modules){const k=MODK[m.t];for(const f in k.fx){const v=k.fx[f];if(f==="spower"){if(!dark)r.power=clamp(r.power+v,0,capP())}else if(f==="sp")S.sp+=v;else if(f==="radd")S.rad=Math.max(0,Math.round((S.rad+v)*10)/10);else if(f==="dustd")S.dust=clamp(S.dust+v);else if(f.startsWith("m_"))S.mat[f.slice(2)]=(S.mat[f.slice(2)]||0)+v;else if(["armor","walk","cap","prot","warn","eva","buildx","cargo"].includes(f))continue;else r[f]=f==="power"?clamp(r[f]+v,0,capP()):clamp(r[f]+v)}out.push(k.icon)}if(out.length)log("🏗️ Modules worked all day: "+out.slice(0,12).join(" ")+(out.length>12?" +"+(out.length-12):""));clampRes()}
+  S.sp+=5;log("🛰️ Mission Control grant: +5 SP");
+  const e=pickEvent("night");S.ev={id:e.id,chosen:null,fx:"",kind:"night"};S.phase="event";save();go("event")}
+/* ============ EVENTS ============ */
+function renderEvent(){
+  const e=EV.find(x=>x.id===S.ev.id),ch=S.ev.chosen,k=S.ev.kind,t=ETYPE[e.type]||ETYPE.env;
+  const lead=k==="night"?"Night "+S.day:k==="eva"?"EVA incident":"Morning, Day "+S.day;
+  let b=`<div class="hudcard">${hudHTML()}</div><div class="card"><div class="row"><span class="tag" style="font-size:.85rem">${t[0]} ${t[1]}</span><span class="tag bad" style="font-size:.85rem">${k==="eva"?"incident outside":"major problem"}</span></div><h2>${e.icon} ${lead}: ${esc(e.title)}</h2>${baseScene(k==="night")}<p>${esc(e.text)}</p>${LOSTEV[e.id]?`<p class="small bad">🕯️ This hazard killed the crew of Outpost ${LOSTEV[e.id]} “${esc(STORIES[LOSTEV[e.id]-1].name)}”.</p>`:""}`;
+  if(ch===null)b+=`<p class="muted small">Choose one. Every option costs something.</p>`+e.opts.map((o,i)=>`<button class="opt" onclick="chooseOpt(${i})">${esc(o.l)}<span class="ctx">${esc(o.ctx)}</span></button>`).join("");
+  else b+=`<p><b>You chose:</b> ${esc(e.opts[ch].l)}</p><p class="${S.ev.fx?"":"muted"}">${S.ev.fx||"No change."}</p><div class="debrief"><b>${esc(e.real[0])}</b><br>${esc(e.real[1])}</div><button class="primary" onclick="afterEvent()">${k==="night"?"Continue into the night →":"Continue →"}</button>`;
+  return b+`</div>`}
+function chooseOpt(i){const e=EV.find(x=>x.id===S.ev.id),o=e.opts[i];S.ev.chosen=i;S.ev.fx=applyFx(o.fx,MD().sev,e.prot);S.evLog.push(e.id);log(e.icon+" "+e.title+": "+o.l);save();render()}
+function afterEvent(){
+  const k=S.ev.kind,after=S.ev.after;
+  if(k==="night"){toNight();return}
+  S.ev=null;S.phase="day";save();
+  if(checkFail())return;
+  if(k==="eva"){go("day");arriveAt(after);return}
+  go("day")}
+function toNight(){resolveNight();S.phase=S.over?"end":"night";save();go("night")}
+function resolveNight(){
+  const m=MD(),dr=m.dr,r=S.res,L=[];
+  const d={o2:Math.round(NIGHT.o2*dr),water:Math.round(NIGHT.water*dr),food:Math.round(NIGHT.food*dr),power:Math.round(NIGHT.power*dr*(1-Math.min(.3,sumMat("therm")*.006)))};
+  r.o2-=d.o2;r.water-=d.water;r.food-=d.food;r.power-=d.power;r.morale-=NIGHT.morale;
+  L.push(`Night uses: 🫧 -${d.o2}  💧 -${d.water}  🍲 -${d.food}  ⚡ -${d.power} (heaters)  🙂 -${NIGHT.morale}`);
+  let cause=null;
+  if(r.power<0){r.power=0;r.health-=30;L.push("❄️ Power ran out and the heaters switched off. The habitat froze: health -30.");cause="power"}
+  if(r.water<=0){r.water=0;r.health-=25;L.push("🏜️ Out of water: health -25.");cause="water"}
+  if(r.food<=0){r.food=0;r.health-=15;L.push("🍽️ Out of food: health -15.");cause="food"}
+  if(r.morale<=0){r.morale=0;r.health-=10;L.push("😞 Morale hit zero: health -10.");cause="morale"}
+  if(S.rad>=120){const h=Math.round((S.rad>=180?4:2)*m.sev);r.health-=h;L.push("☢️ Radiation sickness at "+Math.round(S.rad)+" mSv: nausea and fatigue, health -"+h+".");cause=cause||"radiation"}
+  if(r.o2<=0){r.o2=0;L.push("🫧 The oxygen ran out.");S.over={win:false,cause:"o2",why:"oxygen"}}
+  if(S.rad>=RADMAX&&!S.over)S.over={win:false,cause:"rad",why:"radiation"};
+  if(r.health<=0&&!S.over)S.over={win:false,cause:"health",why:cause||"health"};
+  if(m.free){S.over=null;for(const k in r)r[k]=Math.max(r[k],k==="health"?10:5)}
+  clampRes();
+  if(!S.over){
+    if(S.day>=NIGHTS){if(S.loaded.length>=m.samp){S.over={win:true};ES=0;S.sp+=50+S.loaded.length*10;L.push("🌅 Dawn on Day "+(NIGHTS+1)+". You survived all "+NIGHTS+" days! +"+(50+S.loaded.length*10)+" SP")}else{S.over={win:false,incomplete:true};L.push("🌅 Dawn on Day "+(NIGHTS+1)+". You survived, but only "+S.loaded.length+" of "+m.samp+" samples were delivered.")}}
+    else{S.day++;const st=siteOf();
+      if(S.day===st.dark[0]-1)L.push("🌇 Sunset is near. Tomorrow the long dark begins, with no sunlight for "+(st.dark[1]-st.dark[0]+1)+" days.");
+      if(S.day===st.dark[0])L.push("🌑 The dark days begin. No sunlight for "+(st.dark[1]-st.dark[0]+1)+" days and about -173 °C outside. Solar panels make no power.");
+      if(S.day===st.dark[1]+1)L.push("🌅 Sunrise! The Sun is back and solar panels work again.");
+      const lowM=r.morale<25?2:0;S.energy=Math.max(2,m.en-S.penalty-lowM);if(lowM)L.push("😞 Low morale: 2 fewer hours of energy tomorrow.");if(S.penalty)L.push("🔧 Repairs from the event: -"+S.penalty+" hours tomorrow.");S.penalty=0}}
+  S.report=L;log("🌙 Night "+(S.over?S.day:S.day-1)+" complete.")}
+function renderNight(){
+  return `<div class="hudcard">${hudHTML()}</div><div class="card"><h2>🌙 Night ${S.over?S.day:S.day-1} report</h2>${baseScene(true)}<div class="log" style="max-height:none">${S.report.map(l=>`<p>${esc(l)}</p>`).join("")}</div>${S.over?`<button class="primary" onclick="go('end')">See the result →</button>`:`<button class="primary" onclick="startDay()">☀️ Start Day ${S.day} →</button>`}</div>`}
+
+let ES=0;
+function capsuleSVG(){return `<path d="M-14,10 L-9,-22 Q0,-34 9,-22 L14,10Z" fill="#eceff8" stroke="#8a90a8"/><path d="M-14,10 L14,10 L10,16 L-10,16Z" fill="#6b4a2a"/><circle cx="0" cy="-8" r="4" fill="#60a5fa"/><path d="M-9,-22 L9,-22" stroke="#cbd0e6"/>`}
+function endSceneLift(){return `<svg viewBox="0 0 800 340" class="scene" role="img" aria-label="Return capsule lifting off from the Moon"><defs><linearGradient id="ls" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#02040f"/><stop offset="1" stop-color="#1a2760"/></linearGradient><radialGradient id="le" cx=".35" cy=".35"><stop offset="0" stop-color="#9fd0ff"/><stop offset="1" stop-color="#1e4fa8"/></radialGradient></defs><rect width="800" height="340" fill="url(#ls)"/>${starsSVG(80,800,340,13)}<circle cx="640" cy="80" r="34" fill="url(#le)"/><path d="M0,290 Q200,262 400,285 T800,280 V340 H0Z" fill="#6a6e8a"/><rect y="300" width="800" height="40" fill="#585c78"/><ellipse cx="400" cy="302" rx="70" ry="8" fill="rgba(0,0,0,.3)"/><g class="rise"><g transform="translate(400,282) scale(1.6)">${capsuleSVG()}<path class="flame" d="M-6,16 L0,44 L6,16Z" fill="#fb923c"/><path class="flame" d="M-3,16 L0,32 L3,16Z" fill="#fde047"/></g></g><circle class="puff" cx="400" cy="292" r="26" fill="#ddd" opacity=".5"/><circle class="puff" cx="360" cy="296" r="18" fill="#ddd" opacity=".4"/><circle class="puff" cx="440" cy="296" r="18" fill="#ddd" opacity=".4"/></svg>`}
+function endSceneSplash(){return `<svg viewBox="0 0 800 340" class="scene" role="img" aria-label="Capsule splashing down in the ocean"><defs><linearGradient id="ss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#f9b27c"/></linearGradient></defs><rect width="800" height="340" fill="url(#ss)"/><circle cx="130" cy="210" r="30" fill="#ffe08a" opacity=".9"/><rect y="230" width="800" height="110" fill="#1d4f91"/><path d="M0,236 Q50,228 100,236 T200,236 T300,236 T400,236 T500,236 T600,236 T700,236 T800,236" stroke="#8cc4ff" stroke-width="2" fill="none"/><g transform="translate(640,236)"><path d="M-70,0 L70,0 L55,22 L-55,22Z" fill="#cfd3e6"/><rect x="-20" y="-24" width="40" height="24" fill="#e5e7eb"/><rect x="-6" y="-38" width="3" height="14" fill="#cbd0e6"/><rect x="-24" y="-8" width="10" height="6" fill="#60a5fa"/></g><g class="fall"><g transform="translate(330,150)"><path d="M-70,-90 Q-35,-140 0,-90 Q35,-140 70,-90" fill="none"/><path d="M-60,-62 Q-30,-120 0,-62Z" fill="#f97316"/><path d="M0,-62 Q30,-120 60,-62Z" fill="#fff"/><path d="M-20,-66 Q0,-96 20,-66Z" fill="#f97316"/><path d="M-55,-62 L-6,10 M55,-62 L6,10 M0,-62 L0,10" stroke="#ddd" stroke-width="1.2"/><g transform="translate(0,26) scale(1.2)">${capsuleSVG()}</g></g></g></svg>`}
+function rankOf(){const r=S.res,avg=(r.o2+r.water+r.food+r.power+r.health+r.morale)/6;return avg>=70?["🥇","Gold: Commander of Outpost 7"]:avg>=45?["🥈","Silver: Outpost 7 Operator"]:["🥉","Bronze: Outpost 7 Survivor"]}
+function renderEnd(){
+  const o=S.over,evs=[...new Set(S.evLog)].map(id=>EV.find(e=>e.id===id)),cards=evs.map(e=>`<div class="debrief"><b>${e.icon} ${esc(e.real[0])}</b><br>${esc(e.real[1])}</div>`).join("");
+  if(o.win){
+    const nav=(n,l)=>`<div class="row" style="margin-top:10px"><button class="primary" onclick="ES=${n};render()">${l}</button></div>`;
+    if(ES===0)return `<div class="card"><h2>🏅 Survived ${NIGHTS} days!</h2>${baseScene(false)}<p class="good"><b>Days survived: ${NIGHTS} of ${NIGHTS}</b></p><p>Dawn breaks on Day ${NIGHTS+1}. The radio crackles: <i>"Outpost 7, this is Mission Control. We have your signal. Six crews came before you, and none lasted the week. You are the first to survive."</i></p><p>Oxygen ${S.res.o2} · Water ${S.res.water} · Food ${S.res.food} · Power ${S.res.power} · Health ${S.res.health} · Morale ${S.res.morale}</p><p>Your ${S.loaded.length} rock samples are sealed in the return capsule.</p>${nav(1,"🚀 Launch the return capsule →")}</div>`;
+    if(ES===1)return `<div class="card"><h2>🚀 Liftoff</h2>${endSceneLift()}<p>The capsule fires its engine. With only one sixth of Earth's gravity and no air, it climbs fast and silent. Your samples are heading home.</p>${nav(2,"🌍 Return to Earth →")}</div>`;
+    if(ES===2)return `<div class="card"><h2>🌊 Splashdown</h2>${endSceneSplash()}<p>Days later the capsule hits Earth's air at about 11 km/s. The heat shield glows, parachutes open and the capsule splashes down. A recovery ship hoists it aboard.</p>${nav(3,"🔬 Lab results →")}</div>`;
+    const rk=rankOf();
+    return `<div class="card"><h2>🔬 Mission complete: the lab results</h2><p>Scientists open your sample tubes:</p><div class="grid">${S.loaded.map(id=>{const t=SAMPLES.find(x=>x.id===id);return `<div class="card" style="margin:0"><h3>${t.icon} ${esc(t.n)}</h3><p class="small">${esc(t.fact)}</p></div>`}).join("")}</div>
+    <div class="debrief"><b>${rk[0]} ${rk[1]}</b><br>Survived ${NIGHTS} of ${NIGHTS} days with ${S.loaded.length} sample${S.loaded.length===1?"":"s"} delivered. Final Science Points: <b>${S.sp}</b></div>
+    <div class="debrief"><b>🕯️ In memory of the Six Lost Crews</b><br>${STORIES.map(st=>"Outpost "+st.n+" “"+esc(st.name)+"”: "+st.crew.map(esc).join(", ")).join("<br>")}<br><br>Outpost 7 carried their research home. You read ${storiesFound()} of their 6 logs.</div><h3>The real missions behind your nights</h3>${cards||"<p class='muted'>No events recorded.</p>"}
+    <div class="row" style="margin-top:10px"><button class="primary" onclick="go('modes')">Play again</button><button onclick="ES=0;render()">Replay ending</button><button onclick="go('home')">Home</button></div></div>`}
+  if(o.incomplete)return `<div class="card"><h2>🌑 Survived, but the mission is incomplete</h2>${baseScene(false)}<p class="good"><b>Days survived: ${NIGHTS} of ${NIGHTS}</b></p><p>You lived through all ${NIGHTS} days, but Mission Control needed <b>${MD().samp} rock samples</b> loaded in the return capsule and you only delivered <b>${S.loaded.length}</b>. The science was the whole reason for Outpost 7.</p><p class="muted">Next time, collect samples at the field site early and load them at the landing pad.</p><h3>What the real missions teach</h3>${cards||"<p class='muted'>No events recorded.</p>"}<div class="row" style="margin-top:10px"><button class="primary" onclick="pickMode('${S.mode}')">Try again</button><button onclick="go('modes')">Change mode</button><button onclick="go('home')">Home</button></div></div>`;
+  const f=FAIL[o.cause]||FAIL.health;
+  return `<div class="card"><h2>💥 Outpost 7 was lost on night ${S.day}</h2>${baseScene(true)}<p><b>${esc(f[0])}.</b> ${esc(f[1])}</p><p class="muted">Cause chain: ${esc(o.why)}.</p><h3>What the real missions teach</h3>${cards||"<p class='muted'>No events recorded.</p>"}<div class="row" style="margin-top:10px"><button class="primary" onclick="pickMode('${S.mode}')">Try again</button><button onclick="go('modes')">Change mode</button><button onclick="go('home')">Home</button></div></div>`}
+
+/* ============ ARRIVAL ============ */
+function pickMode(k){S=fresh();S.mode=k;S.phase="lore";S.energy=MODES[k].en;save();go("lore")}
+function renderLore(){
+  return `<div class="card"><h2>📜 Outpost 7: mission briefing</h2><p class="muted">In this story, six lunar outposts were built before yours. Every crew was lost within the first week. Mission Control calls this the Six Lost Crews. Their wrecks are scattered across the Moon, and their last logs are still waiting to be found.</p>
+  <div class="grid">${STORIES.map(st=>`<div class="card" style="margin:0"><h3>🕯️ Outpost ${st.n} “${esc(st.name)}”</h3><p class="small muted">${st.crew.map(esc).join(" · ")}</p><p class="small muted">Lost on night ${st.night}</p><p class="small">${esc(st.head)}</p></div>`).join("")}</div>
+  <p>Outpost 7 is yours. <b>Survive ${NIGHTS} days (a full lunar cycle) and bring home ${MD().samp} rock samples.</b> Every day you will make choices. Major problems will strike often, and radiation from the Sun and deep space adds up. Stay under ${RADMAX} mSv, keep your six survival meters above zero, and learn from the six crews who came before you.</p>
+  <button class="primary" onclick="startTraining()">🎓 Start astronaut training →</button><button class="sm" onclick="go('howto')">🎮 How to play</button><button class="sm" onclick="openManual()">📖 Manual</button></div>`}
+/* ============ QUIZ ============ */
+function startQuiz(){if(S.energy<1){toast("Not enough hours left today.");return}S.energy--;S.res.morale=clamp(S.res.morale+3);save();Q={qs:[...QUIZ].sort(()=>rnd()-.5).slice(0,5),i:0,right:0,picked:null,pts:0};go("quiz")}
+function renderQuiz(){
+  if(Q.i>=Q.qs.length)return '<div class="card"><h2>Quiz complete!</h2><p>You got <b>'+Q.right+'/'+Q.qs.length+'</b> and earned <b>'+Q.pts+' SP</b>.</p><button class="primary" onclick="S.tab=\'mission\';go(\'day\')">Back to the outpost</button></div>';
+  const q=Q.qs[Q.i];
+  return '<div class="card"><h2>❓ Quiz '+(Q.i+1)+'/'+Q.qs.length+'</h2><p><b>'+esc(q.q)+'</b></p>'+q.a.map((x,j)=>'<button class="opt '+(Q.picked!==null&&j===q.c?'sel':'')+'" '+(Q.picked!==null?'disabled':'')+' onclick="answerQ('+j+')">'+esc(x)+'</button>').join("")+(Q.picked!==null?'<div class="debrief">'+(Q.picked===q.c?'<b class="good">Correct! +'+q.v+' SP</b>':'<b class="bad">Not quite.</b>')+' '+esc(q.e)+'</div><button class="primary" onclick="Q.i++;Q.picked=null;render()">Next →</button>':'')+'</div>'}
+function answerQ(j){const q=Q.qs[Q.i];Q.picked=j;if(j===q.c){Q.right++;Q.pts+=q.v;S.sp+=q.v;save()}render()}
+/* ============ MODES SCREEN ============ */
+function modes(){
+  return '<div class="card"><h2>Choose your training mode</h2><p class="muted">Survive '+NIGHTS+' days at Outpost 7. '+(S.mode&&S.phase!=="home"?'Starting a new outpost erases your current one.':'Pick how tough Mission Control should be.')+'</p></div><div class="grid">'+Object.keys(MODES).map(k=>{const m=MODES[k];return '<div class="card" style="margin:0"><h3>'+m.icon+' '+m.n+'</h3><p class="small muted">'+m.tag+'</p><p class="small">'+esc(m.desc)+'</p><button class="primary" onclick="pickMode(\''+k+'\')">Start '+m.n+'</button></div>'}).join("")+'</div><div class="row" style="margin-top:12px"><button onclick="go(\'home\')">🏠 Home</button></div>'}
+/* ============ HOME ============ */
+function resume(){const p=S.phase;go(p==="lore"?"lore":p==="training"?"training":p==="howto"?"howto":p==="event"?"event":p==="night"?"night":p==="end"?"end":"day")}
+function renderHome(){
+  const has=!!S.mode&&S.phase!=="home",info=has?`${MD().icon} ${MD().n} · Day ${Math.min(S.day,NIGHTS)} of ${NIGHTS} · ${S.sp} SP`:"No saved outpost yet";
+  return `<div class="home-wrap"><svg class="home-stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${starsSVG(160,1000,1500,11)}${starsSVG(80,1000,1500,29)}</svg>
+   <h1 class="home-title">OUTPOST 7</h1><p class="home-sub">Six crews were lost. Survive a month on the Moon.</p>
+   ${home()}
+   <p class="home-order">Mercury · Venus · Earth · Mars · Jupiter · Saturn · Uranus · Neptune</p>
+   <div class="home-btns"><button class="hbtn primary" onclick="go('drama')">🚀 New Outpost</button><button class="hbtn" ${has?"":"disabled"} onclick="resume()">Continue Outpost</button></div>
+   <p class="home-info">${esc(info)}</p></div>`}
+/* ============ RENDER ============ */
+function chips(){$("#chips").innerHTML=S.mode&&S.phase!=="home"?`<span class="chip">${MD().icon} ${MD().n}</span><span class="chip">🌙 Day ${Math.min(S.day,NIGHTS)}/${NIGHTS}</span><span class="chip">⭐ ${S.sp} SP</span>`:""}
+function render(){
+  stopLive();stopDrama();chips();document.body.classList.toggle("home",V==="home"||V==="drama");
+  const f={home:renderHome,modes,lore:renderLore,drama:renderDrama,training:renderTraining,howto:renderHowTo,manual:renderManual,day:renderDay,event:renderEvent,night:renderNight,end:renderEnd,quiz:renderQuiz}[V];
+  $("#app").innerHTML=f();if(V==="day"&&S.tab==="build"){bRefresh()}if(V==="day"&&S.tab==="data"){startLive()}if(V==="drama"){startDrama()}}
+V="home";render();
+
+</script>
+</body>
+</html>
