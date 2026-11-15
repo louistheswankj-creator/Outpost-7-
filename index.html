@@ -1140,7 +1140,7 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
 function liveHTML(){
   return `<div class="chartbox"><div class="row spread"><h4><span class="livedot"></span> Live telemetry from Outpost 7</h4><button class="sm" id="livebtn" onclick="liveToggle()">⏸ Pause</button></div><p class="small muted">Sensor traces update several times a second. They are simulated from the state of your base: the dose rate climbs during a solar storm, power follows your batteries, cabin air follows your oxygen.</p><canvas id="livecv" class="livecv" aria-label="Live telemetry traces"></canvas><div id="livevals" class="small muted"></div></div>
   <div class="chartbox"><h4>☀️ Live space weather from NOAA</h4><div id="noaa" class="small muted">Contacting NOAA Space Weather Prediction Center…</div><canvas id="noaacv" class="livecv" style="display:none" aria-label="GOES solar X-ray flux, last 6 hours"></canvas><div id="noaakp" class="small"></div></div>
-  <div class="chartbox"><h4>🛰️ NASA DONKI: space weather this week</h4><div id="donki" class="small muted">Contacting NASA DONKI…</div><div id="apod"></div></div>
+  <div class="chartbox"><h4>🛰️ NASA DONKI: space weather this week</h4>${keyBox()}<div id="donki" class="small muted">Contacting NASA DONKI…</div><div id="apod"></div></div>
   <div class="chartbox"><h4>🌐 More live NASA and open data</h4><div id="extras" class="small muted">Contacting NASA…</div></div>`}
 function startLive(){
   stopLive();const cv=$("#livecv");if(!cv)return;
@@ -1190,7 +1190,7 @@ function drawNoaa(pts){
 
 /* ============ NASA DONKI + NASA open API ============ */
 const DONKI={ok:false,t:0,d:null,busy:false};
-const NKEY="DEMO_KEY",NBASE="https://api.nasa.gov/";
+let NKEY=(()=>{try{return(localStorage.getItem("o7nasakey")||"").trim()}catch(e){return""}})()||"DEMO_KEY";const NBASE="https://api.nasa.gov/";
 function ymd(d){return d.toISOString().slice(0,10)}
 async function loadDonki(force){
   const box=$("#donki");if(!box)return;
@@ -1204,7 +1204,7 @@ async function loadDonki(force){
     const rec=(DONKI.d.flr||[]).some(f=>/^[MX]/.test(f.classType||"")&&end-new Date(f.peakTime||f.beginTime)<2*864e5);
     REALSUN.donki=rec||(sep||[]).length>0||(rbe||[]).length>0;if(REALSUN.donki)REALSUN.big=true;
     drawDonki();loadApod()}
-  catch(err){DONKI.ok=false;box.innerHTML=`📡 NASA DONKI is not reachable in this window (${esc(String(err.message||err)).slice(0,60)}). Some hosted previews block outside network access. Open the game file directly in a browser to see the real space-weather events of the last 7 days. See them online at <a style="color:var(--blue)" href="https://ccmc.gsfc.nasa.gov/DONKI/" target="_blank" rel="noopener">ccmc.gsfc.nasa.gov/DONKI</a>.`}
+  catch(err){DONKI.ok=false;box.innerHTML=(/429/.test(String(err.message))?`⏳ NASA says the shared key has run out of requests for now. Paste your own free key below.`:"")+`<br>📡 NASA DONKI is not reachable in this window (${esc(String(err.message||err)).slice(0,60)}). Some hosted previews block outside network access. Open the game file directly in a browser to see the real space-weather events of the last 7 days. See them online at <a style="color:var(--blue)" href="https://ccmc.gsfc.nasa.gov/DONKI/" target="_blank" rel="noopener">ccmc.gsfc.nasa.gov/DONKI</a>.`}
   finally{DONKI.busy=false}}
 function dkTime(s){const d=new Date(s);return isNaN(d)?"?":d.toUTCString().slice(5,22)+" UTC"}
 function drawDonki(){
@@ -1231,6 +1231,10 @@ async function loadApod(){
   try{const a=await getJSON(NBASE+"planetary/apod?api_key="+NKEY);if(!a||!a.title)throw new Error("none");box.dataset.ok="1";
     box.innerHTML=`<h5 style="margin:6px 0">🌌 NASA picture of the day: ${esc(a.title)}</h5>${a.media_type==="image"?`<img src="${esc(a.url)}" alt="${esc(a.title)}" style="max-width:100%;border-radius:8px;max-height:260px;object-fit:cover">`:`<p class="small"><a href="${esc(a.url)}" target="_blank" rel="noopener">Open today's video</a></p>`}<p class="small muted">${esc((a.explanation||"").slice(0,260))}${(a.explanation||"").length>260?"…":""} (${esc(a.date||"")}, NASA Astronomy Picture of the Day)</p>`}
   catch(_){box.innerHTML=""}}
+
+function keyBox(){return `<div class="row small" style="gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0"><span class="muted">NASA API key in use: <b>${NKEY==="DEMO_KEY"?"shared DEMO_KEY (limited to about 30 requests an hour)":NKEY.slice(0,4)+"…"+NKEY.slice(-3)+" (yours)"}</b></span><input id="nkey" placeholder="Paste your own free key from api.nasa.gov" style="min-width:240px;flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text)"><button class="sm" onclick="saveKey()">Use key</button></div>`}
+function saveKey(){const v=($("#nkey").value||"").trim();if(!/^[A-Za-z0-9]{20,60}$/.test(v)){alert("That does not look like a NASA API key (letters and numbers, about 40 characters).");return}
+  try{localStorage.setItem("o7nasakey",v)}catch(e){}NKEY=v;DONKI.d=null;const x=$("#extras");if(x)x.dataset.ok="";const a=$("#apod");if(a)a.dataset.ok="";loadDonki(true);loadExtras()}
 
 /* ============ MORE REAL NASA / OPEN DATA ============ */
 const XT={iss:null,t:0};

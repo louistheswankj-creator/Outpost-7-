@@ -43,3 +43,5 @@ The Data tab loads the last 7 days of real space weather from NASA DONKI (api.na
 The Data tab also shows NASA NeoWs (asteroids this week), NASA EPIC (Earth now, Moon world), NASA Mars Rover Photos (Perseverance, Mars world), the NASA Image Library, NOAA solar wind (DSCOVR) and the live ISS position. A fast solar wind raises the in-game radiation chance.
 
 The NASA calls use the shared `DEMO_KEY` (about 30 requests an hour). To use your own free key from api.nasa.gov, change `NKEY` near the top of the DONKI section in `outpost-7.html`. Do not commit a personal key to a public repo.
+
+The NASA panels use a shared `DEMO_KEY` by default. Paste your own free key from api.nasa.gov into the box in the Data tab and the game saves it in your browser only, so it is never stored in this repo.
