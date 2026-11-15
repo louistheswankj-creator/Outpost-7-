@@ -1204,7 +1204,7 @@ async function loadDonki(force){
     const rec=(DONKI.d.flr||[]).some(f=>/^[MX]/.test(f.classType||"")&&end-new Date(f.peakTime||f.beginTime)<2*864e5);
     REALSUN.donki=rec||(sep||[]).length>0||(rbe||[]).length>0;if(REALSUN.donki)REALSUN.big=true;
     drawDonki();loadApod()}
-  catch(err){DONKI.ok=false;box.innerHTML=(/429/.test(String(err.message))?`⏳ NASA says the shared key has run out of requests for now. Paste your own free key below.`:"")+`<br>📡 NASA DONKI is not reachable in this window (${esc(String(err.message||err)).slice(0,60)}). Some hosted previews block outside network access. Open the game file directly in a browser to see the real space-weather events of the last 7 days. See them online at <a style="color:var(--blue)" href="https://ccmc.gsfc.nasa.gov/DONKI/" target="_blank" rel="noopener">ccmc.gsfc.nasa.gov/DONKI</a>.`}
+  catch(err){DONKI.ok=false;const rl=/429/.test(String(err.message));box.innerHTML=`<p>🔑 <b>${rl?"The shared key has used up its requests for now.":"Connect NASA DONKI."}</b> Paste your free NASA API key in the box above and click <b>Use key</b> to load the real events of the last 7 days: solar flares, CMEs, geomagnetic storms, proton events and radiation belt enhancements.</p><p class="small">Get a key in a minute at <a style="color:var(--blue)" href="https://api.nasa.gov/" target="_blank" rel="noopener">api.nasa.gov</a>. You can also browse the same events on <a style="color:var(--blue)" href="https://ccmc.gsfc.nasa.gov/DONKI/events/?start=now+-+7d&end=now" target="_blank" rel="noopener">NASA DONKI</a>.</p>`}
   finally{DONKI.busy=false}}
 function dkTime(s){const d=new Date(s);return isNaN(d)?"?":d.toUTCString().slice(5,22)+" UTC"}
 function drawDonki(){
@@ -1263,7 +1263,7 @@ async function loadExtras(){
   const res=await Promise.allSettled(jobs.map(j=>j[1]()));
   const got=res.filter(r=>r.status==="fulfilled").map(r=>r.value);
   box.dataset.ok=got.length?"1":"";
-  box.innerHTML=got.length?`<div class="row" style="gap:10px;flex-wrap:wrap;align-items:stretch">${got.join("")}</div><p class="small muted">${got.length} of ${jobs.length} live sources answered. Sources: api.nasa.gov (NeoWs, ${mars?"Mars Rover Photos":"EPIC"}), NASA Image Library, NOAA SWPC, wheretheiss.at.</p>`:`📡 The live NASA sources are not reachable in this window. Open the game file directly in a browser to see them.`;
+  box.innerHTML=got.length?`<div class="row" style="gap:10px;flex-wrap:wrap;align-items:stretch">${got.join("")}</div><p class="small muted">${got.length} of ${jobs.length} live sources answered. Sources: api.nasa.gov (NeoWs, ${mars?"Mars Rover Photos":"EPIC"}), NASA Image Library, NOAA SWPC, wheretheiss.at.</p>`:`🔑 Add your free NASA API key in the DONKI box above to load asteroids, the ISS, solar wind and NASA photos.`;
   if(!XT.tm)XT.tm=setInterval(()=>{if(!$("#issmap"))return;getJSON("https://api.wheretheiss.at/v1/satellites/25544").then(r=>{XT.iss=r;const c=$("#isscard");if(c)c.innerHTML=issInner(r)}).catch(()=>{})},10000)}
 function issInner(r){
   const x=(r.longitude+180)/360*300,y=(90-r.latitude)/180*150;
