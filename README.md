@@ -38,3 +38,8 @@ Open `outpost-7.html` in any browser. Six lunar outposts were lost within their 
 
 ## NASA DONKI and NASA open API
 The Data tab loads the last 7 days of real space weather from NASA DONKI (api.nasa.gov, DEMO_KEY): solar flares, CMEs, geomagnetic storms, solar energetic particles and radiation belt enhancements, shown as a timeline with counts, plus the NASA Astronomy Picture of the Day. Real M/X flares, proton events or belt enhancements make in-game radiation events more likely. If the network is blocked (some hosted previews), the panel shows a fallback message and the game still works.
+
+## More live NASA and open data
+The Data tab also shows NASA NeoWs (asteroids this week), NASA EPIC (Earth now, Moon world), NASA Mars Rover Photos (Perseverance, Mars world), the NASA Image Library, NOAA solar wind (DSCOVR) and the live ISS position. A fast solar wind raises the in-game radiation chance.
+
+The NASA calls use the shared `DEMO_KEY` (about 30 requests an hour). To use your own free key from api.nasa.gov, change `NKEY` near the top of the DONKI section in `outpost-7.html`. Do not commit a personal key to a public repo.

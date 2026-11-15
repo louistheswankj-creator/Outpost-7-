@@ -1140,13 +1140,14 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
 function liveHTML(){
   return `<div class="chartbox"><div class="row spread"><h4><span class="livedot"></span> Live telemetry from Outpost 7</h4><button class="sm" id="livebtn" onclick="liveToggle()">⏸ Pause</button></div><p class="small muted">Sensor traces update several times a second. They are simulated from the state of your base: the dose rate climbs during a solar storm, power follows your batteries, cabin air follows your oxygen.</p><canvas id="livecv" class="livecv" aria-label="Live telemetry traces"></canvas><div id="livevals" class="small muted"></div></div>
   <div class="chartbox"><h4>☀️ Live space weather from NOAA</h4><div id="noaa" class="small muted">Contacting NOAA Space Weather Prediction Center…</div><canvas id="noaacv" class="livecv" style="display:none" aria-label="GOES solar X-ray flux, last 6 hours"></canvas><div id="noaakp" class="small"></div></div>
-  <div class="chartbox"><h4>🛰️ NASA DONKI: space weather this week</h4><div id="donki" class="small muted">Contacting NASA DONKI…</div><div id="apod"></div></div>`}
+  <div class="chartbox"><h4>🛰️ NASA DONKI: space weather this week</h4><div id="donki" class="small muted">Contacting NASA DONKI…</div><div id="apod"></div></div>
+  <div class="chartbox"><h4>🌐 More live NASA and open data</h4><div id="extras" class="small muted">Contacting NASA…</div></div>`}
 function startLive(){
   stopLive();const cv=$("#livecv");if(!cv)return;
   const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(300,cv.clientWidth||600),H=LCH.length*58+6;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
   LIVE={W,H,dpr,paused:false,n:150,hist:LCH.map(()=>[]),v:LCH.map(d=>d.t()),spike:LCH.map(()=>0)};
   for(let k=0;k<LIVE.n;k++)liveStep();
-  LIVE.timer=setInterval(()=>{if(!LIVE.paused){liveStep();liveDraw()}},250);liveDraw();loadNoaa();loadDonki();LIVE.noaaT=setInterval(loadNoaa,60000)}
+  LIVE.timer=setInterval(()=>{if(!LIVE.paused){liveStep();liveDraw()}},250);liveDraw();loadNoaa();loadDonki();loadExtras();LIVE.noaaT=setInterval(loadNoaa,60000)}
 function stopLive(){if(LIVE){clearInterval(LIVE.timer);clearInterval(LIVE.noaaT);LIVE=null}}
 function liveToggle(){if(!LIVE)return;LIVE.paused=!LIVE.paused;const b=$("#livebtn");if(b)b.textContent=LIVE.paused?"▶ Resume":"⏸ Pause"}
 function liveStep(){
@@ -1230,6 +1231,40 @@ async function loadApod(){
   try{const a=await getJSON(NBASE+"planetary/apod?api_key="+NKEY);if(!a||!a.title)throw new Error("none");box.dataset.ok="1";
     box.innerHTML=`<h5 style="margin:6px 0">🌌 NASA picture of the day: ${esc(a.title)}</h5>${a.media_type==="image"?`<img src="${esc(a.url)}" alt="${esc(a.title)}" style="max-width:100%;border-radius:8px;max-height:260px;object-fit:cover">`:`<p class="small"><a href="${esc(a.url)}" target="_blank" rel="noopener">Open today's video</a></p>`}<p class="small muted">${esc((a.explanation||"").slice(0,260))}${(a.explanation||"").length>260?"…":""} (${esc(a.date||"")}, NASA Astronomy Picture of the Day)</p>`}
   catch(_){box.innerHTML=""}}
+
+/* ============ MORE REAL NASA / OPEN DATA ============ */
+const XT={iss:null,t:0};
+function xCard(t,b){return `<div class="card" style="flex:1;min-width:260px;margin:0"><h5 style="margin:0 0 6px">${t}</h5>${b}</div>`}
+async function loadExtras(){
+  const box=$("#extras");if(!box)return;
+  if(box.dataset.ok&&Date.now()-XT.t<600000)return;
+  XT.t=Date.now();const today=new Date(),ds=ymd(today),end=ymd(new Date(today.getTime()+6*864e5));
+  const parts=[];const mars=S.world==="mars";
+  const jobs=[
+   ["neo",()=>getJSON(NBASE+`neo/rest/v1/feed?start_date=${ds}&end_date=${end}&api_key=${NKEY}`).then(r=>{
+      const all=[];Object.keys(r.near_earth_objects||{}).forEach(d=>r.near_earth_objects[d].forEach(a=>{const c=(a.close_approach_data||[])[0]||{};all.push({n:a.name.replace(/[()]/g,""),h:a.is_potentially_hazardous_asteroid,m:a.estimated_diameter.meters.estimated_diameter_max,v:+(c.relative_velocity||{}).kilometers_per_second,ld:+(c.miss_distance||{}).lunar,d:c.close_approach_date_full||d})}));
+      all.sort((a,b)=>a.ld-b.ld);const near=all.slice(0,4);
+      return xCard("☄️ Near-Earth asteroids, next 7 days (NASA NeoWs)",`<p class="small"><b>${r.element_count}</b> asteroids pass by this week, <b>${all.filter(a=>a.h).length}</b> flagged potentially hazardous. Closest approaches:</p><ul class="small">${near.map(a=>`<li><b>${esc(a.n)}</b>: ${a.ld.toFixed(1)}× the Moon's distance, about ${Math.round(a.m)} m wide, ${a.v.toFixed(1)} km/s${a.h?" ⚠️":""}</li>`).join("")}</ul>`)})],
+   ["iss",()=>getJSON("https://api.wheretheiss.at/v1/satellites/25544").then(r=>{XT.iss=r;return issCard(r)})],
+   ["sw",()=>Promise.all([getJSON("https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json"),getJSON("https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json")]).then(([pl,mg])=>{
+      const lastOk=(a,i)=>{for(let k=a.length-1;k>0;k--){const v=parseFloat(a[k][i]);if(!isNaN(v))return v}return null};
+      const sp=lastOk(pl,2),de=lastOk(pl,1),bz=lastOk(mg,3),bt=lastOk(mg,6);if(sp&&sp>600)REALSUN.big=true;
+      return xCard("🌬️ Solar wind right now (NOAA, DSCOVR satellite)",`<p class="small">Speed <b>${sp!==null?Math.round(sp):"?"} km/s</b> · density <b>${de!==null?de.toFixed(1):"?"} per cm³</b> · magnetic field <b>${bt!==null?bt.toFixed(1):"?"} nT</b> (Bz ${bz!==null?bz.toFixed(1):"?"}).</p><p class="small muted">${sp>600?"⚠️ A fast wind stream is passing Earth. Radiation events are more likely in your game.":"Calm. A typical wind is about 400 km/s. A strongly south-pointing Bz (negative) lets a storm in."}</p>`)})],
+   ["img",()=>getJSON(`https://images-api.nasa.gov/search?media_type=image&q=${mars?"mars%20surface%20rover":"moon%20surface%20lunar"}`).then(r=>{
+      const it=(r.collection.items||[]).filter(i=>i.links&&i.links[0]&&i.data&&i.data[0]);if(!it.length)throw new Error("none");const x=it[(today.getDate()*7)%it.length];
+      return xCard(`${mars?"🔴":"🌙"} From the NASA Image Library`,`<img src="${esc(x.links[0].href)}" alt="${esc(x.data[0].title)}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px"><p class="small"><b>${esc(x.data[0].title)}</b></p><p class="small muted">NASA ${esc(x.data[0].center||"")} · ${esc((x.data[0].date_created||"").slice(0,10))}</p>`)})]
+  ];
+  if(mars)jobs.push(["rov",()=>getJSON(NBASE+`mars-photos/api/v1/rovers/perseverance/latest_photos?api_key=${NKEY}`).then(r=>{const p=(r.latest_photos||[])[0];if(!p)throw new Error("none");return xCard("🤖 Newest photo from Perseverance on Mars",`<img src="${esc(p.img_src)}" alt="Perseverance photo" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px"><p class="small">Sol ${p.sol} (${esc(p.earth_date)}) · ${esc(p.camera.full_name)}</p>`)})]);
+  else jobs.push(["epic",()=>getJSON(NBASE+`EPIC/api/natural?api_key=${NKEY}`).then(r=>{const p=r[0];if(!p)throw new Error("none");const d=p.date.slice(0,10).split("-");return xCard("🌍 Earth right now (NASA EPIC camera, 1.5 million km away)",`<img src="https://epic.gsfc.nasa.gov/archive/natural/${d[0]}/${d[1]}/${d[2]}/jpg/${p.image}.jpg" alt="Earth from the DSCOVR satellite" style="width:100%;max-height:260px;object-fit:contain;border-radius:8px;background:#000"><p class="small muted">${esc(p.caption||"")} ${esc(p.date)} UTC</p>`)})]);
+  const res=await Promise.allSettled(jobs.map(j=>j[1]()));
+  const got=res.filter(r=>r.status==="fulfilled").map(r=>r.value);
+  box.dataset.ok=got.length?"1":"";
+  box.innerHTML=got.length?`<div class="row" style="gap:10px;flex-wrap:wrap;align-items:stretch">${got.join("")}</div><p class="small muted">${got.length} of ${jobs.length} live sources answered. Sources: api.nasa.gov (NeoWs, ${mars?"Mars Rover Photos":"EPIC"}), NASA Image Library, NOAA SWPC, wheretheiss.at.</p>`:`📡 The live NASA sources are not reachable in this window. Open the game file directly in a browser to see them.`;
+  if(!XT.tm)XT.tm=setInterval(()=>{if(!$("#issmap"))return;getJSON("https://api.wheretheiss.at/v1/satellites/25544").then(r=>{XT.iss=r;const c=$("#isscard");if(c)c.innerHTML=issInner(r)}).catch(()=>{})},10000)}
+function issInner(r){
+  const x=(r.longitude+180)/360*300,y=(90-r.latitude)/180*150;
+  return `<svg id="issmap" viewBox="0 0 300 150" style="width:100%;border-radius:8px;background:#0b2a5a"><path d="M30,40 L70,30 L100,45 L90,70 L60,80 L40,65Z M120,30 L170,28 L190,50 L175,75 L150,70 L130,95 L115,70Z M200,35 L260,38 L270,62 L230,70 L205,55Z M70,95 L95,100 L90,130 L75,125Z M215,100 L250,102 L245,125 L220,120Z" fill="#2f7d4f" opacity=".7"/><circle cx="${x}" cy="${y}" r="9" fill="#ffb347" opacity=".3"><animate attributeName="r" values="5;11;5" dur="2s" repeatCount="indefinite"/></circle><circle cx="${x}" cy="${y}" r="4" fill="#ffb347" stroke="#fff"/></svg><p class="small">Latitude <b>${r.latitude.toFixed(1)}°</b>, longitude <b>${r.longitude.toFixed(1)}°</b> · altitude <b>${Math.round(r.altitude)} km</b> · speed <b>${Math.round(r.velocity).toLocaleString()} km/h</b> · ${esc(r.visibility||"")}. Updates every 10 seconds.</p>`}
+function issCard(r){return xCard("🛰️ International Space Station, live",`<div id="isscard">${issInner(r)}</div>`)}
 
 /* ============ ASTRONAUT TRAINING ACADEMY (real training) ============ */
 const trainTimelineSVG=()=>`<svg viewBox="0 0 600 96" class="chart" role="img" aria-label="Astronaut career timeline: selection, about two years of candidate training, mission assignment, mission training, flight"><rect width="600" height="96" fill="var(--surf)" rx="8"/><g font-size="11" fill="#10131f"><rect x="14" y="16" width="86" height="26" fill="#d55181" rx="3"/><text x="57" y="33" text-anchor="middle">Selection</text><rect x="104" y="16" width="170" height="26" fill="#3987e5" rx="3"/><text x="189" y="33" text-anchor="middle">Candidate training (about 2 years)</text><rect x="278" y="16" width="100" height="26" fill="#c98500" rx="3"/><text x="328" y="33" text-anchor="middle">Assignment</text><rect x="382" y="16" width="130" height="26" fill="#199e70" rx="3"/><text x="447" y="33" text-anchor="middle">Mission training</text><rect x="516" y="16" width="72" height="26" fill="#d95926" rx="3"/><text x="552" y="33" text-anchor="middle">Flight</text></g><text x="14" y="70" font-size="11" fill="var(--muted2)">In 2021 NASA chose 10 candidates from more than 12,000 applicants.</text></svg>`;
