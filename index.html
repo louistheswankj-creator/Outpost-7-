@@ -1139,13 +1139,14 @@ const LCH=[
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
 function liveHTML(){
   return `<div class="chartbox"><div class="row spread"><h4><span class="livedot"></span> Live telemetry from Outpost 7</h4><button class="sm" id="livebtn" onclick="liveToggle()">⏸ Pause</button></div><p class="small muted">Sensor traces update several times a second. They are simulated from the state of your base: the dose rate climbs during a solar storm, power follows your batteries, cabin air follows your oxygen.</p><canvas id="livecv" class="livecv" aria-label="Live telemetry traces"></canvas><div id="livevals" class="small muted"></div></div>
-  <div class="chartbox"><h4>☀️ Live space weather from NOAA</h4><div id="noaa" class="small muted">Contacting NOAA Space Weather Prediction Center…</div><canvas id="noaacv" class="livecv" style="display:none" aria-label="GOES solar X-ray flux, last 6 hours"></canvas><div id="noaakp" class="small"></div></div>`}
+  <div class="chartbox"><h4>☀️ Live space weather from NOAA</h4><div id="noaa" class="small muted">Contacting NOAA Space Weather Prediction Center…</div><canvas id="noaacv" class="livecv" style="display:none" aria-label="GOES solar X-ray flux, last 6 hours"></canvas><div id="noaakp" class="small"></div></div>
+  <div class="chartbox"><h4>🛰️ NASA DONKI: space weather this week</h4><div id="donki" class="small muted">Contacting NASA DONKI…</div><div id="apod"></div></div>`}
 function startLive(){
   stopLive();const cv=$("#livecv");if(!cv)return;
   const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(300,cv.clientWidth||600),H=LCH.length*58+6;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
   LIVE={W,H,dpr,paused:false,n:150,hist:LCH.map(()=>[]),v:LCH.map(d=>d.t()),spike:LCH.map(()=>0)};
   for(let k=0;k<LIVE.n;k++)liveStep();
-  LIVE.timer=setInterval(()=>{if(!LIVE.paused){liveStep();liveDraw()}},250);liveDraw();loadNoaa();LIVE.noaaT=setInterval(loadNoaa,60000)}
+  LIVE.timer=setInterval(()=>{if(!LIVE.paused){liveStep();liveDraw()}},250);liveDraw();loadNoaa();loadDonki();LIVE.noaaT=setInterval(loadNoaa,60000)}
 function stopLive(){if(LIVE){clearInterval(LIVE.timer);clearInterval(LIVE.noaaT);LIVE=null}}
 function liveToggle(){if(!LIVE)return;LIVE.paused=!LIVE.paused;const b=$("#livebtn");if(b)b.textContent=LIVE.paused?"▶ Resume":"⏸ Pause"}
 function liveStep(){
@@ -1185,6 +1186,50 @@ function drawNoaa(pts){
   const lp=pts[pts.length-1];c.fillStyle="#c98500";c.beginPath();c.arc(X(lp.t),Y(lp.f),4,0,6.3);c.fill();c.strokeStyle="#111a3d";c.lineWidth=2;c.stroke();
   c.fillStyle="#eaf0ff";c.font="12px Audiowide,sans-serif";c.textAlign="left";c.fillText(flareClass(lp.f),X(lp.t)-pw*.12,Math.max(T+8,Y(lp.f)-12));
   c.fillStyle="#9aa8d8";c.font="10px Audiowide,sans-serif";c.textAlign="center";c.fillText("6 hours ago",L+30,H-6);c.fillText("now",L+pw-10,H-6);c.save();c.translate(10,T+ph/2);c.rotate(-Math.PI/2);c.fillText("X-ray flux (W/m²)",0,0);c.restore()}
+
+/* ============ NASA DONKI + NASA open API ============ */
+const DONKI={ok:false,t:0,d:null,busy:false};
+const NKEY="DEMO_KEY",NBASE="https://api.nasa.gov/";
+function ymd(d){return d.toISOString().slice(0,10)}
+async function loadDonki(force){
+  const box=$("#donki");if(!box)return;
+  if(DONKI.d&&!force&&Date.now()-DONKI.t<600000){drawDonki();return}
+  if(DONKI.busy)return;DONKI.busy=true;
+  const end=new Date(),st=new Date(end.getTime()-7*864e5),q=`?startDate=${ymd(st)}&endDate=${ymd(end)}&api_key=${NKEY}`;
+  try{
+    const g=async k=>{try{const r=await getJSON(NBASE+"DONKI/"+k+q);return Array.isArray(r)?r:[]}catch(e){if(k==="FLR")throw e;return null}};
+    const [flr,cme,gst,sep,rbe]=await Promise.all(["FLR","CME","GST","SEP","RBE"].map(g));
+    DONKI.d={flr,cme,gst,sep,rbe,st:st.getTime(),en:end.getTime()};DONKI.ok=true;DONKI.t=Date.now();
+    const rec=(DONKI.d.flr||[]).some(f=>/^[MX]/.test(f.classType||"")&&end-new Date(f.peakTime||f.beginTime)<2*864e5);
+    REALSUN.donki=rec||(sep||[]).length>0||(rbe||[]).length>0;if(REALSUN.donki)REALSUN.big=true;
+    drawDonki();loadApod()}
+  catch(err){DONKI.ok=false;box.innerHTML=`📡 NASA DONKI is not reachable in this window (${esc(String(err.message||err)).slice(0,60)}). Some hosted previews block outside network access. Open the game file directly in a browser to see the real space-weather events of the last 7 days. See them online at <a style="color:var(--blue)" href="https://ccmc.gsfc.nasa.gov/DONKI/" target="_blank" rel="noopener">ccmc.gsfc.nasa.gov/DONKI</a>.`}
+  finally{DONKI.busy=false}}
+function dkTime(s){const d=new Date(s);return isNaN(d)?"?":d.toUTCString().slice(5,22)+" UTC"}
+function drawDonki(){
+  const box=$("#donki"),D=DONKI.d;if(!box||!D)return;
+  const T=(a,b)=>a===null?"n/a":a.length,W=720,H=170,x0=76,x1=W-14,sx=t=>x0+(x1-x0)*(t-D.st)/(D.en-D.st),rows=[["Flares","flr","#d95926",f=>f.peakTime||f.beginTime],["CMEs","cme","#3987e5",f=>f.startTime],["Storms (Kp)","gst","#c98500",f=>f.startTime],["Protons","sep","#d55181",f=>f.eventTime],["Belt","rbe","#199e70",f=>f.eventTime]];
+  let o=`<svg viewBox="0 0 ${W} ${H}" class="chart" role="img" aria-label="Space weather events of the last 7 days from NASA DONKI"><rect width="${W}" height="${H}" fill="var(--surf)" rx="8"/>`;
+  for(let d=0;d<=7;d++){const x=x0+(x1-x0)*d/7;o+=`<line x1="${x}" y1="14" x2="${x}" y2="${H-24}" stroke="#2b3a78" stroke-opacity=".6"/><text x="${x}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${d===7?"now":"-"+(7-d)+"d"}</text>`}
+  rows.forEach((r,i)=>{const y=28+i*26;o+=`<text x="${x0-4}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--muted)">${r[0]}</text><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#2b3a78" stroke-dasharray="2 4"/>`;
+    (D[r[1]]||[]).forEach(e=>{const t=new Date(r[3](e)).getTime();if(!(t>=D.st&&t<=D.en))return;const big=r[1]==="flr"&&/^[MX]/.test(e.classType||"");o+=`<circle cx="${sx(t)}" cy="${y}" r="${big?7:5}" fill="${r[2]}" stroke="#fff" stroke-opacity=".6"><title>${r[0]}: ${esc(r[1]==="flr"?(e.classType||"")+" flare, "+dkTime(r[3](e)):dkTime(r[3](e)))}</title></circle>`})});
+  o+="</svg>";
+  const nf=T(D.flr),big=(D.flr||[]).filter(f=>/^[MX]/.test(f.classType||"")),fastest=(D.cme||[]).map(c=>{const a=(c.cmeAnalyses||[]).find(x=>x.isMostAccurate)||(c.cmeAnalyses||[])[0];return a&&a.speed?a.speed:0}).reduce((a,b)=>Math.max(a,b),0);
+  const maxKp=(D.gst||[]).reduce((m,g)=>Math.max(m,...(g.allKpIndex||[]).map(k=>k.kpIndex||0)),0);
+  const rb=D.rbe;
+  const tile=(n,l,c)=>`<div class="card" style="flex:1;min-width:120px;text-align:center;border-top:3px solid ${c}"><div style="font-size:24px;font-weight:700">${n}</div><div class="small muted">${l}</div></div>`;
+  const latest=(D.flr||[]).slice(-3).reverse().map(f=>`<li>☀️ <b>${esc(f.classType||"flare")}</b> flare, peak ${dkTime(f.peakTime||f.beginTime)}${f.sourceLocation?" at "+esc(f.sourceLocation):""}</li>`).join("");
+  box.innerHTML=`<p class="small"><span class="livedot"></span> <b>LIVE</b> from NASA DONKI (Space Weather Database Of Notifications, Knowledge, Information) for the last 7 days. Each dot is a real event.</p>
+  <div class="row" style="gap:8px;flex-wrap:wrap">${tile(nf,"solar flares","#d95926")}${tile(big.length,"M or X flares","#d95926")}${tile(T(D.cme),"CMEs"+(fastest?" · fastest "+Math.round(fastest)+" km/s":""),"#3987e5")}${tile(T(D.gst),"geomagnetic storms"+(maxKp?" · Kp "+maxKp:""),"#c98500")}${tile(T(D.sep),"proton events","#d55181")}${tile(T(rb),"radiation belt events","#199e70")}</div>${o}
+  <h5 style="margin:10px 0 4px">🛰️ Radiation belt (Van Allen belts)</h5>
+  <p class="small">${rb===null?"Radiation belt data was not returned this time.":rb.length?`DONKI logged <b>${rb.length} radiation belt enhancement${rb.length>1?"s":""}</b> this week (most recent ${dkTime(rb[rb.length-1].eventTime)}). During an enhancement, energetic electrons in the belts surge, which can damage satellites and add to a crew's dose when they pass through.`:`No radiation belt enhancement was logged this week. The Van Allen belts are two rings of trapped charged particles around Earth, and a solar storm can make them surge.`}</p>
+  <h5 style="margin:10px 0 4px">Latest flares</h5><ul class="small">${latest||"<li>No flares were logged this week.</li>"}</ul>
+  <p class="small muted">${REALSUN.donki?"⚠️ Real activity this week makes radiation events a little more likely in your game.":"A quiet Sun this week. Your game's radiation events use the normal chance."}</p>`}
+async function loadApod(){
+  const box=$("#apod");if(!box||box.dataset.ok)return;
+  try{const a=await getJSON(NBASE+"planetary/apod?api_key="+NKEY);if(!a||!a.title)throw new Error("none");box.dataset.ok="1";
+    box.innerHTML=`<h5 style="margin:6px 0">🌌 NASA picture of the day: ${esc(a.title)}</h5>${a.media_type==="image"?`<img src="${esc(a.url)}" alt="${esc(a.title)}" style="max-width:100%;border-radius:8px;max-height:260px;object-fit:cover">`:`<p class="small"><a href="${esc(a.url)}" target="_blank" rel="noopener">Open today's video</a></p>`}<p class="small muted">${esc((a.explanation||"").slice(0,260))}${(a.explanation||"").length>260?"…":""} (${esc(a.date||"")}, NASA Astronomy Picture of the Day)</p>`}
+  catch(_){box.innerHTML=""}}
 
 /* ============ ASTRONAUT TRAINING ACADEMY (real training) ============ */
 const trainTimelineSVG=()=>`<svg viewBox="0 0 600 96" class="chart" role="img" aria-label="Astronaut career timeline: selection, about two years of candidate training, mission assignment, mission training, flight"><rect width="600" height="96" fill="var(--surf)" rx="8"/><g font-size="11" fill="#10131f"><rect x="14" y="16" width="86" height="26" fill="#d55181" rx="3"/><text x="57" y="33" text-anchor="middle">Selection</text><rect x="104" y="16" width="170" height="26" fill="#3987e5" rx="3"/><text x="189" y="33" text-anchor="middle">Candidate training (about 2 years)</text><rect x="278" y="16" width="100" height="26" fill="#c98500" rx="3"/><text x="328" y="33" text-anchor="middle">Assignment</text><rect x="382" y="16" width="130" height="26" fill="#199e70" rx="3"/><text x="447" y="33" text-anchor="middle">Mission training</text><rect x="516" y="16" width="72" height="26" fill="#d95926" rx="3"/><text x="552" y="33" text-anchor="middle">Flight</text></g><text x="14" y="70" font-size="11" fill="var(--muted2)">In 2021 NASA chose 10 candidates from more than 12,000 applicants.</text></svg>`;

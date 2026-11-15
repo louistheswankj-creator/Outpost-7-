@@ -35,3 +35,6 @@ Open `outpost-7.html` in any browser. Six lunar outposts were lost within their 
 - Clickable scaled map in the Explore tab, with 1, 2 and 3 km rings.
 - Live habitat systems schematic in the Base tab (tanks, battery, heart monitor, morale, radiation dial).
 - Rock sample illustrations, module previews in the build planner, Moon and Mars discs, and a diagram for each training lesson.
+
+## NASA DONKI and NASA open API
+The Data tab loads the last 7 days of real space weather from NASA DONKI (api.nasa.gov, DEMO_KEY): solar flares, CMEs, geomagnetic storms, solar energetic particles and radiation belt enhancements, shown as a timeline with counts, plus the NASA Astronomy Picture of the Day. Real M/X flares, proton events or belt enhancements make in-game radiation events more likely. If the network is blocked (some hosted previews), the panel shows a fallback message and the game still works.
