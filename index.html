@@ -978,6 +978,7 @@ function dataBody(){
   const cats={};S.modules.forEach(m=>{const c=CATN[MODK[m.t].cat];cats[c]=(cats[c]||0)+1});
   const life=[{k:"o2",n:"Oxygen",c:VC.o2},{k:"water",n:"Water",c:VC.water},{k:"food",n:"Food",c:VC.food}],crew=[{k:"power",n:"Power",c:VC.power},{k:"health",n:"Health",c:VC.health},{k:"morale",n:"Morale",c:VC.morale}];
   return liveHTML()+`<p class="small muted">The charts below update every morning. Hover or tap a chart to read values. Every chart has a table view.</p>`+
+  needsChartHTML()+
   barChart("Meters right now (percent of full)",RES.map(r=>({l:r[1]+" "+r[2],v:S.res[r[0]]/(r[0]==="power"?cap:100)*100,t:Math.round(S.res[r[0]])+(r[0]==="power"?" / "+cap:" / 100")+(S.res[r[0]]<25?" ⚠️ low":"")})).concat([{l:"☢️ Radiation dose",v:S.rad/RADMAX*100,t:S.rad.toFixed(1)+" / "+RADMAX+" mSv"+(S.rad>=120?" ⚠️ sickness range":"")}]),{max:100})+
   lineChart("o2","Oxygen by day",[life[0]],{max:100})+
   lineChart("water","Water by day",[life[1]],{max:100})+
@@ -1001,6 +1002,7 @@ function renderManual(){
   ${sec("0. Moon and Mars",`<p>You chose <b>${W().n}</b>. The two worlds play differently.</p><ul><li><b>Moon:</b> full sunlight but 15 dark days, radiation about 1.4 mSv/day, radio delay 1.3 seconds, cargo every day.</li><li><b>Mars:</b> sunlight only 45% as strong, two dust storms, radiation about 0.67 mSv/day, radio delay 4 to 24 minutes (calls home help half as much), cargo every other day and orders take 3 days. The air is full of carbon dioxide you can turn into oxygen, but the soil has toxic perchlorates.</li></ul>`,true)}
   ${sec("1. Your mission",`<p>Survive <b>${NIGHTS} days</b> at Outpost 7, the seventh outpost on ${W().n}. Six crews before you were lost. To <b>win</b> you must survive all ${NIGHTS} days, collect the required number of rock samples (4 to 6 by mode, 1 in Free Play) and load them into the return capsule.</p><p>You <b>lose</b> if oxygen reaches 0, health reaches 0 or your radiation dose reaches ${RADMAX} mSv. (Free Play cannot be lost.)</p>`,true)}
   ${sec("2. How a day works",`<p>Each morning you have a number of <b>hours</b> (11 to 18 by mode). Almost everything uses hours: <b>Maintain</b> jobs, <b>Science</b> tasks, <b>Explore</b> trips, <b>Build</b> work and <b>Mission</b> tasks. Hours do not carry over.</p><p>Often a <b>major problem</b> strikes in the morning (a choice with trade-offs). When you press <b>End the day</b>, the day's supplies are used, daily module effects happen, and a <b>night event</b> strikes. Then you read the night report and start the next day. Trips outside can also cause an <b>EVA incident</b>.</p>`)}
+  ${sec("2b. Eating, drinking and sleeping",`<p>Your <b>energy hours</b> are your strength for the day. Doing tasks uses them up, and when they hit zero you cannot do any more jobs.</p><ul><li>🍳🥪🍝 <b>Eat three meals</b> a day (breakfast, then lunch and dinner later in the day). Each meal uses food from the store and gives <b>+1 hour</b> of energy and a little morale.</li><li>💧 <b>Drink water</b> up to four times a day. You need at least three.</li><li>😴 <b>Choose to sleep</b> when you are done or out of energy. Sleeping ends the day.</li><li>Skipped meals cost health tonight and an hour of energy tomorrow each. Too little water costs health and morale.</li></ul><p><b>Real data:</b> astronauts eat about three meals a day, and the ISS schedules about 8.5 hours for sleep, although crews often get less. Food and water use in this game follows your meals and drinks, so the Data tab shows how what you choose to eat and drink matches what is left in the store.</p>`)}
   ${sec("3. The seven meters",`<p>🫧 <b>Oxygen</b>, 💧 <b>water</b>, 🍲 <b>food</b>, ⚡ <b>power</b>, ❤️ <b>health</b>, 🙂 <b>morale</b> and ☢️ <b>radiation</b>. Each full day uses oxygen, water and food. Power is made by panels and modules and used by the base and heaters.</p><ul><li>Oxygen at 0 ends the mission.</li><li>No water: health −25 each night. No food: health −15.</li><li>Power below 0 at night: the heaters stop and health −30.</li><li>Morale at 0: health −10. Morale below 25: 2 fewer hours the next day.</li></ul><p>Fix them with the <b>Maintain</b> tab (scrubbers, recycling, meals, exercise, calls home) and with modules.</p>`)}
   ${S.world==="mars"?sec("4. Sols, dust storms and power",`<p>A Mars day (a sol) lasts about 24 hours 37 minutes. Sunlight at Mars is only about 43% as strong as at Earth, so solar panels make less than half the power they would on the Moon. Two <b>dust storms</b> (3 to 6 sols each) block almost all of the Sun, and dust covers panels faster (+22% a day, so brush them). Nights are cold (about −100 °C) and your heaters use power every night. Build power that does not depend on sunlight, such as a <b>Kilopower reactor</b>, batteries and fuel cells. Power storage is capped at 100 (more with fuel cells and batteries).</p>`):sec("4. Lunar days and nights, and power",`<p>A real lunar day lasts about 29.5 Earth days (NASA). In this game <b>days 1 to 15 are sunlit</b> and <b>days 16 to ${NIGHTS} are dark</b>. Solar panels make power only when it is sunlit, and dust covers them (+18% a day, so brush them). During the dark days outside is about −173 °C and you need power that does not depend on sunlight, such as a <b>Kilopower reactor</b>, batteries and fuel cells. Power storage is capped at 100 (more with fuel cells and batteries).</p>`)}
   ${sec("5. Radiation",`<p>${S.world==="mars"?"Mars has a thin atmosphere but no global magnetic field. NASA's Curiosity rover measured about <b>0.67 mSv a day</b> on the surface, about half the Moon's dose.":"The Moon has no atmosphere or magnetic field, so radiation reaches the surface. You get about <b>1.4 mSv a day</b> (NASA-era surface measurements)."} Your dose is multiplied by the mode setting and reduced by your shielding. Trips outside add a bit more. <b>Solar particle events</b> can add 45 to 110 mSv if you ignore them. <b>Cosmic ray surges</b> add a smaller dose.</p><p>At <b>120 mSv</b> you get radiation sickness (health loss each night). At <b>${RADMAX} mSv</b> the mission ends. (NASA's career limit for astronauts is 600 mSv.)</p><p>Reduce the dose with <b>shielding</b>: radiation shelters, water walls, regolith berms and burying modules under regolith (+0.5 shield each). Thick materials help too: regolith bricks (shield 4) and steel (shield 3) beat carbon fiber (0). Flare alarms and radiation monitors warn you early and cut the dose of storm events.</p>`)}
@@ -1013,6 +1015,46 @@ function renderManual(){
   ${sec("12. A good first three days",`<ol><li>Day 1: fix any low meter, brush the solar panels, then <b>build something small</b> that makes power or air.</li><li>Day 2: explore the nearby field site for your first sample, and read the Base tab.</li><li>Day 3: build a <b>radiation shelter</b> (regolith). Check the Data tab. Keep 2 to 3 hours free for problems.</li><li>Before day 16: build a <b>Kilopower reactor</b> and batteries for the dark days.</li></ol>`)}
   </div>`}
 /* ============ TRAINING ACADEMY ============ */
+
+/* ============ EAT, DRINK, SLEEP ============ */
+const MEALS=[["🍳","Breakfast",0],["🥪","Lunch",.4],["🍝","Dinner",.7]],NDRINK=4,DRINKMIN=3;
+function mealFood(){return Math.round((DAY.food+NIGHT.food)*MD().dr/3)}
+function drinkWater(){return Math.round((DAY.water+NIGHT.water)*MD().dr/NDRINK)}
+function needsInit(){if(!Array.isArray(S.mealDone))S.mealDone=[0,0,0];if(typeof S.drinks!=="number")S.drinks=0;if(!Array.isArray(S.needs))S.needs=[]}
+function mealsEaten(){needsInit();return S.mealDone.filter(Boolean).length}
+function eatMeal(i){needsInit();if(S.mealDone[i])return;const f=mealFood();
+  if(dayProg()<MEALS[i][2]&&i>0){toast("It is not "+MEALS[i][1].toLowerCase()+" time yet. Work a little longer.");return}
+  if(!MD().free&&S.res.food<f){toast("Not enough food in the store for a meal. Cook or order food.");return}
+  S.mealDone[i]=1;if(!MD().free)S.res.food=clamp(S.res.food-f);S.energy+=1;S.res.morale=clamp(S.res.morale+2);
+  log(MEALS[i][0]+" "+MEALS[i][1]+": 🍲 −"+f+", ⚡ +1 hour of energy, 🙂 +2");toast(MEALS[i][0]+" "+MEALS[i][1]+" eaten. +1 hour of energy.");save();render()}
+function drinkWaterNow(){needsInit();if(S.drinks>=NDRINK){toast("You have had enough water today.");return}const w=drinkWater();
+  if(!MD().free&&S.res.water<w){toast("Not enough water in the tank. Recycle water first.");return}
+  S.drinks++;if(!MD().free)S.res.water=clamp(S.res.water-w);log("💧 Drank water ("+S.drinks+"/"+NDRINK+"): 💧 −"+w);toast("💧 Drank water ("+S.drinks+"/"+NDRINK+").");save();render()}
+function missingNeeds(){needsInit();return {m:3-mealsEaten(),d:Math.max(0,DRINKMIN-S.drinks)}}
+function needsBody(){
+  needsInit();const f=mealFood(),w=drinkWater(),mn=missingNeeds(),out=S.energy<=0;
+  const meals=MEALS.map((m,i)=>{const done=S.mealDone[i],late=!done&&i>0&&dayProg()<m[2];return `<button class="opt" style="flex:1;min-width:140px" ${done||late||(!MD().free&&S.res.food<f)?"disabled":""} onclick="eatMeal(${i})">${m[0]} ${m[1]} ${done?"✅":""}<span class="ctx">${done?"Eaten":late?"Later in the day":"🍲 −"+f+" food · ⚡ +1 hour · 🙂 +2"}</span></button>`}).join("");
+  const cups=Array.from({length:NDRINK},(_,i)=>`<span style="font-size:22px;opacity:${i<S.drinks?1:.25}">💧</span>`).join("");
+  return `<div class="card" style="margin:0 0 10px;${out?"border-color:#f87171":""}"><h4 style="margin:0 0 6px">🍽️ Daily needs: eat, drink and sleep</h4>
+  ${out?`<p class="bad"><b>😵 You have no energy left today.</b> Eat a meal for an extra hour, drink some water, or choose to go to sleep.</p>`:""}
+  <p class="small muted">Real astronauts eat about three meals a day, drink water all day and have about 8.5 hours scheduled for sleep. Here you choose each one. Every meal gives <b>+1 hour of energy</b>. Skipping meals or water makes you weaker tonight and slower tomorrow.</p>
+  <div class="row" style="gap:8px;flex-wrap:wrap">${meals}</div>
+  <div class="row" style="gap:10px;align-items:center;margin-top:8px"><button class="opt" style="flex:0 0 auto" ${S.drinks>=NDRINK?"disabled":""} onclick="drinkWaterNow()">💧 Drink water <span class="ctx">💧 −${w} water each</span></button><span title="Drinks today">${cups}</span><span class="small muted">${S.drinks}/${NDRINK} (at least ${DRINKMIN})</span></div>
+  <p class="small ${mn.m||mn.d?"warn":"muted"}" style="margin-top:8px">${mn.m||mn.d?"Before you sleep you still need: "+(mn.m?mn.m+" meal"+(mn.m>1?"s":""):"")+(mn.m&&mn.d?" and ":"")+(mn.d?mn.d+" more drink"+(mn.d>1?"s":""):"")+".":"✅ You have eaten and drunk enough for today."}</p></div>`}
+function sleepSummary(){const mn=missingNeeds();return mn.m||mn.d?`⚠️ Skipped: ${mn.m?mn.m+" meal(s)":""}${mn.m&&mn.d?", ":""}${mn.d?mn.d+" drink(s)":""}. You will lose health tonight and have less energy tomorrow.`:"✅ You ate and drank enough. You will wake rested."}
+function goSleep(){endDay()}
+function nightNeeds(L){
+  const m=MD(),r=S.res,mn=missingNeeds(),eaten=mealsEaten();
+  needsInit();S.needs.push({d:S.day,m:eaten,w:S.drinks,e:S.energy});S.needs=S.needs.slice(-40);
+  L.push("🍽️ Today you ate "+eaten+" of 3 meals and drank water "+S.drinks+" times. 💤 You slept about 8 hours.");
+  let fat=0;
+  if(!m.free){
+    if(mn.m){r.health-=mn.m*4;fat+=mn.m;L.push("🍽️ Missed "+mn.m+" meal"+(mn.m>1?"s":"")+": health −"+mn.m*4+" and 1 less hour of energy tomorrow each. Real astronauts lose muscle and focus when they under-eat.")}
+    if(mn.d){r.health-=mn.d*4;r.morale-=mn.d*2;fat+=Math.ceil(mn.d/2);L.push("🥤 Too little water (only "+S.drinks+" drinks): health −"+mn.d*4+", morale −"+mn.d*2+". Dehydration gives headaches and tiredness.")}
+  }
+  S.fatigue=Math.min(4,fat);S.mealDone=[0,0,0];S.drinks=0}
+function needsChartHTML(){needsInit();const rows=S.needs.slice(-10).reverse();
+  return barChart("Today: meals, drinks and energy",[{l:"🍽️ Meals eaten (of 3)",v:mealsEaten()/3*100,t:mealsEaten()+" / 3"},{l:"💧 Drinks (need "+DRINKMIN+" of "+NDRINK+")",v:S.drinks/NDRINK*100,t:S.drinks+" / "+NDRINK},{l:"⚡ Energy hours left",v:Math.min(100,S.energy/MD().en*100),t:S.energy+" of about "+MD().en}],{max:100})+(rows.length?`<div class="chartbox"><h4>Meals and water by day</h4><div style="overflow:auto"><table><tr><th>Day</th><th>Meals</th><th>Drinks</th><th>Hours left at bedtime</th></tr>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.m}/3</td><td>${r.w}/${NDRINK}</td><td>${r.e}</td></tr>`).join("")}</table></div></div>`:"")}
 
 /* ============ MORE VISUALS ============ */
 const SAMC={regolith:"#a39c8c",anorthosite:"#e5e7eb",basalt:"#3b3b4c",ilmenite:"#4a4f6a",breccia:"#8d7058",glass:"#f59e0b",kreep:"#b5651d",ice:"#9bd0ff",dust:"#b5694a",delta:"#c08a5a",mud:"#a0623f",hematite:"#4a6fa5",meteorite:"#6b7280",carbonate:"#5fa36f"};
@@ -1302,7 +1344,7 @@ function finishTraining(){const T=S.train;if(!T.done){T.done=true;S.sp+=T.score*
 function renderHowTo(){
   const c=(i,t,b)=>`<div class="card" style="margin:0"><h3>${i} ${t}</h3><p class="small">${b}</p></div>`;
   return `<div class="card"><h2>🎮 How to play Outpost 7</h2><p class="muted">A quick guide to the game. (Training taught you how real astronauts prepare. This page is about the game itself.) The full rulebook is the 📖 button at the top.</p>
-  <div class="grid">${c("🎯","The goal",`Survive ${NIGHTS} days, bring home ${MD().samp} rock samples and stay under ${RADMAX} mSv of radiation.`)}${c("⏱️","Your day",`You get hours every morning. Spend them on Maintain, Science, Explore, Build or Mission tabs, then press End the day.`)}${c("📊","The meters",`Keep oxygen, water, food, power, health and morale up. Oxygen at 0 ends the mission.`)}${c("🌗","Dark days",`Days 1 to 15 are sunlit. Days 16 to ${NIGHTS} are dark, so solar panels stop. Build a reactor and batteries before then.`)}${c("☢️","Radiation",`It adds up. Shelter from storms and build shielding. 120 mSv makes you sick and ${RADMAX} mSv ends the mission.`)}${c("🏗️","Building",`In the Build tab, type what you want to build, pick a material, then spend hours and power to finish it.`)}${c("🧭","Exploring",`Trips outside cost hours, oxygen and a little radiation. Visit sample sites, then load samples into the capsule.`)}${c("🎲","Problems",`Major problems strike often. Every choice costs something. After you choose, you learn the real NASA story.`)}${c("📈","The Data tab",`Charts show your meters, materials, power and radiation over time so you can plan ahead.`)}</div>
+  <div class="grid">${c("🎯","The goal",`Survive ${NIGHTS} days, bring home ${MD().samp} rock samples and stay under ${RADMAX} mSv of radiation.`)}${c("⏱️","Your day",`You get hours every morning. Spend them on Maintain, Science, Explore, Build or Mission tabs, eat meals and drink water to keep your energy up, then choose to go to sleep to end the day.`)}${c("📊","The meters",`Keep oxygen, water, food, power, health and morale up. Oxygen at 0 ends the mission.`)}${c("🌗","Dark days",`Days 1 to 15 are sunlit. Days 16 to ${NIGHTS} are dark, so solar panels stop. Build a reactor and batteries before then.`)}${c("☢️","Radiation",`It adds up. Shelter from storms and build shielding. 120 mSv makes you sick and ${RADMAX} mSv ends the mission.`)}${c("🏗️","Building",`In the Build tab, type what you want to build, pick a material, then spend hours and power to finish it.`)}${c("🧭","Exploring",`Trips outside cost hours, oxygen and a little radiation. Visit sample sites, then load samples into the capsule.`)}${c("🎲","Problems",`Major problems strike often. Every choice costs something. After you choose, you learn the real NASA story.`)}${c("📈","The Data tab",`Charts show your meters, materials, power and radiation over time so you can plan ahead.`)}</div>
   <div class="row" style="margin-top:12px"><button class="primary" onclick="startDay()">🚀 Begin Day 1 →</button><button onclick="openManual()">📖 Open the full manual</button></div></div>`}
 
 /* ============ SCENE ============ */
@@ -1335,17 +1377,18 @@ function hudHTML(){
   const cap=capP(),dr=MD().dr,counter=(k,icon,name,unit,perDay)=>{const v=Math.round(S.res[k]),pc=v<25?"danger":v<50?"warn":"";return `<div class="cnt ${pc}" title="${name}"><div class="cn">${icon} ${name}</div><div class="cv">${v}<span>${unit}</span></div><div class="cd">▼ about ${perDay} a day</div></div>`};
   const bar=r=>{const v=S.res[r[0]],m=r[0]==="power"?cap:100,pc=Math.max(0,Math.min(100,v/m*100));return `<div class="hb" title="${r[2]}"><span>${r[1]} ${r[2]} ${Math.round(v)}</span><div class="bar ${pc<25?"danger":pc<50?"warn":""}"><i style="width:${pc}%"></i></div></div>`};
   const rp=Math.min(100,S.rad/RADMAX*100),spToday=S.sp-(S.spDay0===undefined?S.sp:S.spDay0);
-  return `<div class="hrow"><span class="hchip strong">🌑 Day ${S.day}/${NIGHTS}</span><span class="hchip">${isDark(S.day)?W().darkIcon+" "+W().darkLabel:"☀️ "+W().sunLabel}</span><span class="hchip">🕒 ${clock()}</span><span class="hchip">🌡️ ${surfaceTemp()} °C outside</span><span class="hchip">⚡ ${S.energy}h left</span><span class="hchip">🛡️ ${armorEff().toFixed(1)}/3</span></div><div class="counters">${counter("o2","🫧","Oxygen","%",Math.round((DAY.o2+NIGHT.o2)*dr))}${counter("water","💧","Water","%",Math.round((DAY.water+NIGHT.water)*dr))}${counter("food","🍲","Food","%",Math.round((DAY.food+NIGHT.food)*dr))}<div class="cnt sp" title="Science Points"><div class="cn">⭐ Science Points</div><div class="cv">${S.sp}<span>SP</span></div><div class="cd">${spToday>=0?"▲ +"+spToday:"▼ "+spToday} today</div></div></div><div class="hbars">${["power","health","morale"].map(k=>bar(RES.find(r=>r[0]===k))).join("")}<div class="hb" title="Radiation dose this month"><span>☢️ Radiation ${Math.round(S.rad)}/${RADMAX} mSv</span><div class="bar ${rp>=70?"danger":rp>=40?"warn":""}"><i style="width:${rp}%"></i></div></div></div>`}
+  return `<div class="hrow"><span class="hchip strong">🌑 Day ${S.day}/${NIGHTS}</span><span class="hchip">${isDark(S.day)?W().darkIcon+" "+W().darkLabel:"☀️ "+W().sunLabel}</span><span class="hchip">🕒 ${clock()}</span><span class="hchip">🌡️ ${surfaceTemp()} °C outside</span><span class="hchip">⚡ ${S.energy}h energy</span><span class="hchip" title="Meals eaten and drinks today">🍽️ ${mealsEaten()}/3 · 💧 ${S.drinks||0}/4</span><span class="hchip">🛡️ ${armorEff().toFixed(1)}/3</span></div><div class="counters">${counter("o2","🫧","Oxygen","%",Math.round((DAY.o2+NIGHT.o2)*dr))}${counter("water","💧","Water","%",Math.round((DAY.water+NIGHT.water)*dr))}${counter("food","🍲","Food","%",Math.round((DAY.food+NIGHT.food)*dr))}<div class="cnt sp" title="Science Points"><div class="cn">⭐ Science Points</div><div class="cv">${S.sp}<span>SP</span></div><div class="cd">${spToday>=0?"▲ +"+spToday:"▼ "+spToday} today</div></div></div><div class="hbars">${["power","health","morale"].map(k=>bar(RES.find(r=>r[0]===k))).join("")}<div class="hb" title="Radiation dose this month"><span>☢️ Radiation ${Math.round(S.rad)}/${RADMAX} mSv</span><div class="bar ${rp>=70?"danger":rp>=40?"warn":""}"><i style="width:${rp}%"></i></div></div></div>`}
 function tip(){
   if(!MD().hints)return"";let t;
   const low=RES.slice(0,5).sort((a,b)=>S.res[a[0]]-S.res[b[0]])[0];
   const m={o2:"Service the oxygen scrubbers.",water:"Recycle water.",food:"Cook a meal.",power:"Tune the battery bank or brush the panels.",health:"Exercise or do a medical check."};
-  if(S.res[low[0]]<45)t=low[2]+" is low. "+m[low[0]];
+  if(mealsEaten()<1&&S.energy>0&&dayProg()<.3)t="Start the day with breakfast. Every meal gives +1 hour of energy.";
+  else if(S.res[low[0]]<45)t=low[2]+" is low. "+m[low[0]];
   else if(S.rad>120)t="Radiation dose is high. Build a radiation shelter and avoid long trips outside.";
   else if(S.day>=4&&S.loaded.length<MD().samp)t="Mission needs "+MD().samp+" rock samples. Use the Explore tab to fetch them, then load them in the Mission tab.";
   else if(S.dust>50)t="Panels are dusty. Brush them before you lose power.";
   else if(S.energy>=3)t="Spare hours? Science tasks earn Science Points, and the Build tab lets you construct modules.";
-  else t="When you are out of hours, end the day.";
+  else t="You are out of energy. Eat a meal for +1 hour, drink water, or choose to go to sleep.";
   return `<p class="small good" style="margin:6px 0 0">💡 Tip: ${esc(t)}</p>`}
 /* ============ MODAL ============ */
 function openModal(html,btn){const m=$("#modal");m.innerHTML='<div class="modalbox">'+html+(btn===false?"":'<div class="row" style="margin-top:10px"><button class="primary" onclick="closeModal()">OK</button></div>')+'</div>';m.hidden=false}
@@ -1358,10 +1401,10 @@ function renderDay(){
   return `<div class="hudcard">${hudHTML()}${tip()}</div>
   <div class="card">${baseScene(false)}<p class="small"><b>📡 NASA fact of the day:</b> ${esc(FACTS[(S.day-1)%FACTS.length])}</p></div>
   <div class="card"><div class="row tabsrow">${tabs.map(t=>`<button class="${T===t[0]?"primary":""}" onclick="S.tab='${t[0]}';render()">${t[1]} ${t[2]}</button>`).join("")}</div>${tabBody(T)}</div>
-  <div class="card row spread"><div><b>⚡ ${S.energy} hours left today</b><br><span class="small muted">When you end the day, tonight's event happens. Hours do not carry over.</span></div><button class="primary" onclick="endDay()">🌙 End the day</button></div>`}
+  <div class="card row spread"><div><b>⚡ ${S.energy} hours of energy left today</b><br><span class="small muted">${S.energy<=0?"😵 No energy left. Eat, drink or sleep. ":""}${sleepSummary()} Sleeping ends the day and tonight's event happens. Hours do not carry over.</span></div><button class="primary" onclick="goSleep()">😴 Go to sleep</button></div>`}
 function tabBody(T){
   const free=MD().free;
-  if(T==="maintain")return `<p class="small muted">Everyday survival jobs. Each uses hours. Work outside costs a little suit oxygen and radiation dose.</p>`+CH.map(c=>{const maxed=c.max&&S.armor>=c.max;const fx=Object.entries(c.fx).filter(([k])=>k!=="armor"&&k!=="dust").map(([k,v])=>RIC[k]+(v>0?"+":"")+v).join(" ");return `<button class="opt" ${S.energy<c.e||maxed?"disabled":""} onclick="doChore('${c.id}')">${c.icon} ${esc(c.n)} <span class="small muted">⚡${c.e}h ${fx}${c.id==="dust"?" 🧹":""}${c.id==="shelter"?" 🛡️+1":""}</span><span class="ctx">${OUTCH[c.id]?"🌑 Outside · ":"🏠 Inside · "}${esc(c.ctx)}</span></button>`}).join("");
+  if(T==="maintain")return needsBody()+`<p class="small muted">Everyday survival jobs. Each uses hours. Work outside costs a little suit oxygen and radiation dose.</p>`+CH.map(c=>{const maxed=c.max&&S.armor>=c.max;const fx=Object.entries(c.fx).filter(([k])=>k!=="armor"&&k!=="dust").map(([k,v])=>RIC[k]+(v>0?"+":"")+v).join(" ");return `<button class="opt" ${S.energy<c.e||maxed?"disabled":""} onclick="doChore('${c.id}')">${c.icon} ${esc(c.n)} <span class="small muted">⚡${c.e}h ${fx}${c.id==="dust"?" 🧹":""}${c.id==="shelter"?" 🛡️+1":""}</span><span class="ctx">${OUTCH[c.id]?"🌑 Outside · ":"🏠 Inside · "}${esc(c.ctx)}</span></button>`}).join("");
   if(T==="science"){const levels=["Very easy","Easy","Medium","Hard","Very hard"];let h=`<p class="small muted">Science tasks cost hours and a little power, and earn Science Points. Harder tasks unlock later: Medium on day 3, Hard on day 5, Very hard on day 8.</p>`;levels.forEach(lv=>{const rows=ACT.map((a,i)=>[a,i]).filter(x=>x[0][7]===lv);if(!rows.length)return;h+=`<p><b>${lv}</b> <span class="small muted">· ⚡${rows[0][0][1]}h each · +${rows[0][0][6]} to +${Math.max(...rows.map(x=>x[0][6]))} SP</span></p>`+rows.map(([a,i])=>{const dn=S.done[i],lock=unlockDay(a)>S.day,pc=Math.ceil(a[2]/4),dis=dn||lock||S.energy<a[1];return `<button class="opt" style="opacity:${dn?.55:1}" ${dis?"disabled":""} onclick="doSci(${i})"><b>${esc(a[0])}</b> <span class="tag">${isOutSci(a)?"🌑 outside":"🔬 inside"}</span><span class="tag">⏱️ ${a[1]}h</span><span class="tag">⚡ ${pc?"power −"+pc:"no power"}</span><span class="tag good">+${a[6]} SP</span>${lock?`<span class="tag">unlocks day ${unlockDay(a)}</span>`:""}${dn?`<span class="ctx">${esc(a[5])}</span>`:""}</button>`}).join("")});return h}
   if(T==="data")return dataBody();
   if(T==="explore")return exploreBody();
@@ -1415,7 +1458,7 @@ function startDay(){
 function closeModalSafe(){const m=$("#modal");if(m){m.hidden=true;m.innerHTML=""}}
 function endDay(){
   const dr=MD().dr,r=S.res,dark=isDark(S.day),gen=genToday(),use=Math.round(DAY.use*dr);
-  r.o2-=Math.round(DAY.o2*dr);r.water-=Math.round(DAY.water*dr);r.food-=Math.round(DAY.food*dr);r.power+=gen-use;r.health-=Math.round(W().hl*dr);r.morale-=DAY.morale;
+  r.o2-=Math.round(DAY.o2*dr);r.power+=gen-use;r.health-=Math.round(W().hl*dr);r.morale-=DAY.morale;
   r.morale+=siteOf().morale;
   const rb=Math.round(radBase()*MD().radm*shieldF()*siteOf().radf*10)/10;S.rad=Math.round((S.rad+rb)*10)/10;
   log((dark?"🌑 Day ":"☀️ Day ")+S.day+" ends: "+(dark?(S.world==="mars"?"dust storm, little sunlight":"no sunlight"):"solar +"+gen+" power ("+Math.round(S.dust)+"% dust)")+", base used "+use+". Radiation +"+rb+" mSv.");
@@ -1442,9 +1485,9 @@ function afterEvent(){
 function toNight(){resolveNight();S.phase=S.over?"end":"night";save();go("night")}
 function resolveNight(){
   const m=MD(),dr=m.dr,r=S.res,L=[];
-  const d={o2:Math.round(NIGHT.o2*dr),water:Math.round(NIGHT.water*dr),food:Math.round(NIGHT.food*dr),power:nightPower()};
-  r.o2-=d.o2;r.water-=d.water;r.food-=d.food;r.power-=d.power;r.morale-=NIGHT.morale;
-  L.push(`Night uses: 🫧 -${d.o2}  💧 -${d.water}  🍲 -${d.food}  ⚡ -${d.power} (heaters)  🙂 -${NIGHT.morale}`);
+  const d={o2:Math.round(NIGHT.o2*dr),water:0,food:0,power:nightPower()};
+  r.o2-=d.o2;r.power-=d.power;r.morale-=NIGHT.morale;
+  L.push(`Night uses: 🫧 -${d.o2}  ⚡ -${d.power} (heaters)  🙂 -${NIGHT.morale}. Food and water are used when you eat and drink.`);nightNeeds(L);
   let cause=null;
   if(r.power<0){r.power=0;r.health-=30;L.push("❄️ Power ran out and the heaters switched off. The habitat froze: health -30.");cause="power"}
   if(r.water<=0){r.water=0;r.health-=25;L.push("🏜️ Out of water: health -25.");cause="water"}
@@ -1459,7 +1502,7 @@ function resolveNight(){
   if(!S.over){
     if(S.day>=NIGHTS){if(S.loaded.length>=m.samp){S.over={win:true};ES=0;S.sp+=50+S.loaded.length*10;L.push("🌅 Dawn on Day "+(NIGHTS+1)+". You survived all "+NIGHTS+" days! +"+(50+S.loaded.length*10)+" SP")}else{S.over={win:false,incomplete:true};L.push("🌅 Dawn on Day "+(NIGHTS+1)+". You survived, but only "+S.loaded.length+" of "+m.samp+" samples were delivered.")}}
     else{S.day++;phaseNotes(L);
-      const lowM=r.morale<25?2:0;S.energy=Math.max(2,m.en-S.penalty-lowM);if(lowM)L.push("😞 Low morale: 2 fewer hours of energy tomorrow.");if(S.penalty)L.push("🔧 Repairs from the event: -"+S.penalty+" hours tomorrow.");S.penalty=0}}
+      const lowM=r.morale<25?2:0;const fat=S.fatigue||0;S.energy=Math.max(2,m.en-3-S.penalty-lowM-fat);if(fat)L.push("🥱 Tired from skipped meals or water: "+fat+" fewer hour(s) of energy tomorrow.");S.fatigue=0;if(lowM)L.push("😞 Low morale: 2 fewer hours of energy tomorrow.");if(S.penalty)L.push("🔧 Repairs from the event: -"+S.penalty+" hours tomorrow.");S.penalty=0}}
   S.report=L;log("🌙 Night "+(S.over?S.day:S.day-1)+" complete.")}
 function renderNight(){
   return `<div class="hudcard">${hudHTML()}</div><div class="card"><h2>🌙 Night ${S.over?S.day:S.day-1} report</h2>${baseScene(true)}<div class="log" style="max-height:none">${S.report.map(l=>`<p>${esc(l)}</p>`).join("")}</div>${S.over?`<button class="primary" onclick="go('end')">See the result →</button>`:`<button class="primary" onclick="startDay()">☀️ Start Day ${S.day} →</button>`}</div>`}
@@ -1497,7 +1540,7 @@ function renderEnd(){
   return `<div class="card"><h2>💥 Outpost 7 was lost on night ${S.day}</h2>${baseScene(true)}<p><b>${esc(f[0])}.</b> ${esc(f[1])}</p><p class="muted">Cause chain: ${esc(o.why)}.</p><h3>What the real missions teach</h3>${cards||"<p class='muted'>No events recorded.</p>"}<div class="row" style="margin-top:10px"><button class="primary" onclick="pickMode('${S.mode}')">Try again</button><button onclick="go('modes')">Change mode</button><button onclick="go('home')">Home</button></div></div>`}
 
 /* ============ ARRIVAL ============ */
-function pickMode(k){S=fresh();S.world=WSEL;S.storms=S.world==="mars"?makeStorms():null;applyWorld();S.mode=k;S.phase="lore";S.energy=MODES[k].en;save();go("lore")}
+function pickMode(k){S=fresh();S.world=WSEL;S.storms=S.world==="mars"?makeStorms():null;applyWorld();S.mode=k;S.phase="lore";S.energy=MODES[k].en-3;S.mealDone=[0,0,0];S.drinks=0;S.needs=[];save();go("lore")}
 function renderLore(){
   return `<div class="card"><h2>📜 Outpost 7: mission briefing</h2><p class="muted">In this story, six outposts on ${W().n} were built before yours. Every crew was lost within the first week. Mission Control calls this the Six Lost Crews. Their wrecks are scattered across ${W().short==="Moon"?"the Moon":"Mars"}, and their last logs are still waiting to be found.</p>
   <div class="grid">${STORIES.map(st=>`<div class="card" style="margin:0"><h3>🕯️ Outpost ${st.n} “${esc(st.name)}”</h3><p class="small muted">${st.crew.map(esc).join(" · ")}</p><p class="small muted">Lost on night ${st.night}</p><p class="small">${esc(st.head)}</p></div>`).join("")}</div>
